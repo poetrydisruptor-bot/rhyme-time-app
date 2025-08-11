@@ -666,25 +666,24 @@
     document.querySelectorAll('.premium-overlay').forEach(el => el.style.display = 'none');
      }
 function loadData() {
-    try {
-        var saved = localStorage.getItem('rhymeTimePoems');
-        if (saved) poems = JSON.parse(saved);
+  try {
+    var saved = localStorage.getItem('rhymeTimePoems');
+    if (saved) poems = JSON.parse(saved);
 
-        // If user already has premium saved, turn it on
-        if (localStorage.getItem('rhymeTimePremium') === 'true') {
-            activatePremium();
-        }
-
-        // Show stored plan in the header
-        const plan = localStorage.getItem('rhymeTimePlan');
-        if (plan) {
-            const status = document.getElementById('status');
-            if (status) status.textContent = `Premium Member (${plan})`;
-        }
-    } 
-    {catch (e) }
-        poems = [];
+    // If user already has premium saved, turn it on
+    if (localStorage.getItem('rhymeTimePremium') === 'true') {
+      activatePremium();
     }
+
+    // Show stored plan in the header
+    const plan = localStorage.getItem('rhymeTimePlan');
+    if (plan) {
+      const status = document.getElementById('status');
+      if (status) status.textContent = `Premium Member (${plan})`;
+    }
+  } catch (e) {
+    poems = [];
+  }
 }
 
 // Close pricing modal when clicking outside it
