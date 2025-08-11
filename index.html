@@ -637,8 +637,7 @@
                 lineItems: [{ price: priceId, quantity: 1 }],
                 mode: 'subscription',
                 successUrl: window.location.href + '?success=true&plan=' + plan,
-                cancelUrl: window.location.href + '?canceled=true',
-                allowPromotion: true
+                cancelUrl: window.location.href + '?canceled=true'
             }).then(function(result) {
                 if (result.error) {
                     console.error('Stripe checkout error:', result.error);
