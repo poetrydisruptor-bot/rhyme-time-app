@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RhymeTime - Poetry Learning App</title>
-    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -455,9 +454,10 @@
         var isPremium = false;
         
         // Replace with your actual Stripe keys and price IDs
-        var stripe = Stripe('pk_live_YOUR_PUBLISHABLE_KEY');
-        var MONTHLY_PRICE = 'price_1Rulc9A8YBQHLwrrdg04Lq7Q';
-        var ANNUAL_PRICE = 'price_1Rulw0A8YBQHLwrraBDRAwJp';
+        const MONTHLY_LINK = "https://buy.stripe.com/fZufZg8Zr0UX2t24F81VK01";
+        const ANNUAL_LINK  = "https://buy.stripe.com/8x27sKejL1Z16Ji1sW1VK00";
+
+        
 
         // BASIC FUNCTIONS
         function showSection(id) {
@@ -598,159 +598,93 @@
         function hidePricing() {
             document.getElementById('pricing-modal').classList.remove('show');
         }
+      // Payment Links checkout (no Stripe.js, no secret keys)
+      function buyPlan(plan) {
+    const MONTHLY_LINK = "https://buy.stripe.com/fZufZg8Zr0UX2t24F81VK01";
+    const ANNUAL_LINK  = "https://buy.stripe.com/8x27sKejL1Z16Ji1sW1VK00";
 
-        function buyPlan(plan) {
-            var priceId = plan === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE;
-            
-            // Debug logging
-            console.log('Starting checkout process...');
-            console.log('Plan selected:', plan);
-            console.log('Price ID:', priceId);
-            console.log('Current domain:', window.location.hostname);
-            
-            // Check if we're in an environment that supports payments
-            if (window.location.hostname.includes('claude.ai') || window.location.hostname === 'localhost') {
-                showAlert('⚠️ Payment testing mode: Real payments require your own domain. Activating premium for demo...', 'premium');
-                setTimeout(function() {
-                    activatePremium();
-                    localStorage.setItem('rhymeTimePremium', 'true');
-                    hidePricing();
-                }, 2000);
-                return;
-            }
-            
-            // Validate Stripe is loaded
-            if (!stripe) {
-                showAlert('❌ Stripe not loaded. Check your internet connection.', 'error');
-                return;
-            }
-            
-            // Validate price ID
-            if (!priceId || priceId.includes('YOUR_')) {
-                showAlert('❌ Price ID not configured. Check your Stripe setup.', 'error');
-                return;
-            }
-            
-            showAlert('🔄 Redirecting to Stripe checkout...', 'success');
-            
-            stripe.redirectToCheckout({
-                lineItems: [{ price: priceId, quantity: 1 }],
-                mode: 'subscription',
-                successUrl: window.location.href + '?success=true&plan=' + plan,
-                cancelUrl: window.location.href + '?canceled=true'
-            }).then(function(result) {
-                if (result.error) {
-                    console.error('Stripe checkout error:', result.error);
-                    showAlert('❌ Payment failed: ' + result.error.message, 'error');
-                }
-            }).catch(function(error) {
-                console.error('Checkout exception:', error);
-                showAlert('❌ Checkout error: ' + error.message, 'error');
-            });
+    const url = plan === 'annual' ? ANNUAL_LINK : MONTHLY_LINK;
+
+    if (!url || !url.includes("buy.stripe.com")) {
+        showAlert('❌ Payment Link not set. Please paste your Stripe link in the code.', 'error');
+        return;
+    }
+
+    showAlert('🔄 Redirecting to secure checkout…', 'success');
+    window.location.href = url;
+}
+
+      // Keep the rest of your app logic the same as before
+
+      function activatePremium() {
+        isPremium = true;
+        var statusEl = document.getElementById('status');
+        if (statusEl) statusEl.textContent = 'Premium Member';
+
+        var locks = document.querySelectorAll('.premium-locked');
+        for (var i = 0; i < locks.length; i++) {
+          locks[i].classList.remove('premium-locked');
         }
 
-        function activatePremium() {
-            isPremium = true;
-            document.getElementById('status').textContent = 'Premium Member';
-            
-            var locks = document.querySelectorAll('.premium-locked');
-            for (var i = 0; i < locks.length; i++) {
-                locks[i].classList.remove('premium-locked');
-            }
-            
-            var overlays = document.querySelectorAll('.premium-overlay');
-            for (var i = 0; i < overlays.length; i++) {
-                overlays[i].style.display = 'none';
-            }
+        var overlays = document.querySelectorAll('.premium-overlay');
+        for (var j = 0; j < overlays.length; j++) {
+          overlays[j].style.display = 'none';
         }
 
-        function checkPremiumStatus(email) {
-            // In production, this would check your database
-            // For now, check localStorage for demo
-            return localStorage.getItem('rhymeTimePremium') === 'true';
+        // persist locally if you want auto-activate on reload
+        localStorage.setItem('rhymeTimePremium', 'true');
+      }
+
+      function checkPremiumStatus(email) {
+        // simple demo storage (replace with real check later)
+        return localStorage.getItem('rhymeTimePremium') === 'true';
+      }
+
+      function checkPayment() {
+        // if you ever append ?success=true to your URL after purchase,
+        // this will activate premium locally
+        var url = new URLSearchParams(window.location.search);
+        if (url.get('success') === 'true') {
+          showAlert('🎉 Payment successful! Activating premium…', 'success');
+          setTimeout(function () {
+            activatePremium();
+          }, 1500);
+          window.history.replaceState({}, '', window.location.pathname);
+        } else if (url.get('canceled') === 'true') {
+          showAlert('Payment canceled', 'error');
+          window.history.replaceState({}, '', window.location.pathname);
         }
+      }
 
-        function checkPayment() {
-            var url = new URLSearchParams(window.location.search);
-            if (url.get('success') === 'true') {
-                showAlert('🎉 Payment successful! Confirming premium access...', 'success');
-                
-                // In production: check your database for premium status
-                // For demo: activate after short delay to simulate webhook processing
-                setTimeout(function() {
-                    var userEmail = 'user@example.com'; // Get from login system
-                    if (checkPremiumStatus(userEmail)) {
-                        activatePremium();
-                        showAlert('🎉 Premium access activated!', 'success');
-                    }
-                }, 3000);
-                
-                window.history.replaceState({}, '', window.location.pathname);
-            } else if (url.get('canceled') === 'true') {
-                showAlert('Payment canceled', 'error');
-                window.history.replaceState({}, '', window.location.pathname);
-            }
+      function loadData() {
+        try {
+          var saved = localStorage.getItem('rhymeTimePoems');
+          if (saved) poems = JSON.parse(saved);
+
+          if (localStorage.getItem('rhymeTimePremium') === 'true') {
+            activatePremium();
+          }
+        } catch (e) {
+          poems = [];
         }
+      }
 
-        function debugStripe() {
-            var debug = 'STRIPE DEBUG INFO:\n\n';
-            debug += '✓ Stripe loaded: ' + (typeof Stripe !== 'undefined' ? 'YES' : 'NO') + '\n';
-            debug += '✓ Stripe instance: ' + (stripe ? 'YES' : 'NO') + '\n';
-            debug += '✓ Monthly Price ID: ' + MONTHLY_PRICE + '\n';
-            debug += '✓ Annual Price ID: ' + ANNUAL_PRICE + '\n';
-            debug += '✓ Current domain: ' + window.location.hostname + '\n';
-            debug += '✓ Protocol: ' + window.location.protocol + '\n';
-            debug += '✓ Full URL: ' + window.location.href + '\n\n';
-            
-            debug += 'COMMON ISSUES:\n';
-            debug += '• Domain must be HTTPS for live keys\n';
-            debug += '• Price IDs must exist in your Stripe account\n';
-            debug += '• Publishable key must match your account\n';
-            debug += '• Test keys (pk_test_) only work with test prices\n';
-            debug += '• Live keys (pk_live_) only work with live prices\n\n';
-            
-            debug += 'NEXT STEPS:\n';
-            debug += '1. Check browser console for errors\n';
-            debug += '2. Verify price IDs in Stripe dashboard\n';
-            debug += '3. Ensure domain is added to Stripe settings\n';
-            debug += '4. Test with pk_test_ keys first';
-            
-            alert(debug);
-            console.log('Stripe Debug Info:', {
-                stripeLoaded: typeof Stripe !== 'undefined',
-                stripeInstance: !!stripe,
-                monthlyPrice: MONTHLY_PRICE,
-                annualPrice: ANNUAL_PRICE,
-                domain: window.location.hostname,
-                protocol: window.location.protocol
-            });
+      // Close pricing modal when clicking outside it
+      window.onclick = function (event) {
+        var modal = document.getElementById('pricing-modal');
+        if (event.target === modal) {
+          hidePricing();
         }
+      };
 
-        // LOAD DATA
-        function loadData() {
-            try {
-                var saved = localStorage.getItem('rhymeTimePoems');
-                if (saved) poems = JSON.parse(saved);
-                
-                if (localStorage.getItem('rhymeTimePremium') === 'true') {
-                    activatePremium();
-                }
-            } catch (e) {
-                poems = [];
-            }
-        }
-
-        // CLOSE MODAL ON CLICK OUTSIDE
-        window.onclick = function(event) {
-            var modal = document.getElementById('pricing-modal');
-            if (event.target === modal) {
-                hidePricing();
-            }
-        };
-
-        // START APP
-        loadData();
-        checkPayment();
+      // START APP
+      loadData();
+      checkPayment();
     </script>
+  </body>
+</html>
+
+        
+        
 </body>
 </html>
