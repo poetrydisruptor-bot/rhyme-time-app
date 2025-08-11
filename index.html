@@ -641,36 +641,29 @@
       }
 
       function checkPayment() {
-        // if you ever append ?success=true to your URL after purchase,
-        // this will activate premium locally
-        var url = new URLSearchParams(window.location.search);
-        if (url.get('success') === 'true') {
-          showAlert('🎉 Payment successful! Activating premium…', 'success');
-          setTimeout(function () {
-            activatePremium();
-          }, 1500);
-          window.history.replaceState({}, '', window.location.pathname);
-        } else if (url.get('canceled') === 'true') {
-          showAlert('Payment canceled', 'error');
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      }
-       // Handle Stripe redirect before loading data
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('success') === 'true') {
-    const plan = urlParams.get('plan'); // "monthly" or "annual"
-    if (plan) {
-        localStorage.setItem('rhymeTimePremium', 'true');
-        localStorage.setItem('rhymeTimePlan', plan);
+  const url = new URLSearchParams(window.location.search);
 
-        alert(`✅ Thank you! Premium ${plan} plan activated.`);
+  if (url.get('success') === 'true') {
+    const plan = (url.get('plan') || 'monthly').toLowerCase();
 
-        // Remove query params from URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    // save for future visits
+    localStorage.setItem('rhymeTimePremium', 'true');
+    localStorage.setItem('rhymeTimePlan', plan);
+
+    // update UI now
+    activatePremium();
+    const status = document.getElementById('status');
+    if (status) status.textContent = `Premium Member (${plan})`;
+    showAlert(`🎉 Payment successful! Premium ${plan} activated.`, 'success');
+
+    // clean the URL so refresh doesn't retrigger
+    window.history.replaceState({}, '', window.location.pathname);
+  } else if (url.get('canceled') === 'true') {
+    showAlert('Payment canceled', 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
 
-// Existing function starts here
 function loadData() {
     try {
         var saved = localStorage.getItem('rhymeTimePoems');
@@ -721,9 +714,9 @@ function loadData() {
         }
       };
 
-      // START APP
-      loadData();
-      checkPayment();
+     document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  checkPayment();
     </script>
   </body>
 </html>
