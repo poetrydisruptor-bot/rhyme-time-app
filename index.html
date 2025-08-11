@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RhymeTime - Poetry Learning App</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .title { font-size: 3rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        
+        .nav-btn {
+            background: white;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .nav-btn:hover { color: #2563eb; border-color: #2563eb; }
+        .nav-btn.active { background: #2563eb; color: white; }
+        
+        .premium-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .upgrade-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .upgrade-btn:hover { background: #d97706; }
+        
+        .content { padding: 2rem; max-width: 800px; margin: 0 auto; }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .page-title { font-size: 2rem; text-align: center; margin-bottom: 1rem; }
+        .page-subtitle { text-align: center; color: #6b7280; margin-bottom: 2rem; }
+        
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 { font-size: 1.3rem; margin-bottom: 1rem; }
+        .card p { color: #6b7280; margin-bottom: 1rem; }
+        
+        .poem-example {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            border-radius: 4px;
+        }
+        
+        .tip-box {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .tip-title { color: #10b981; font-weight: bold; margin-bottom: 0.5rem; }
+        
+        .textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        
+        .textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .btn:hover { background: #1d4ed8; }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        .btn-premium { background: #f59e0b; }
+        .btn-premium:hover { background: #d97706; }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+        
+        .alert-success { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+        .alert-error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+        .alert-premium { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+        
+        .premium-locked {
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .premium-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
+        
+        .poem-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .poem-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .poem-date { font-size: 12px; color: #6b7280; }
+        .poem-content { font-style: italic; line-height: 1.6; white-space: pre-wrap; }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .pricing-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .pricing-card.popular { border-color: #f59e0b; }
+        .price { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
+        .price-period { font-size: 1rem; font-weight: normal; color: #6b7280; }
+        
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem; }
+            .nav-buttons { justify-content: center; }
+            .title { font-size: 2rem; }
+            .content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">RhymeTime</h1>
+            <p class="subtitle">Master the Art of AABB Poetry</p>
+        </div>
+
+        <div class="nav">
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showSection('home')">Home</button>
+                <button class="nav-btn" onclick="showSection('lessons')">Lessons</button>
+                <button class="nav-btn" onclick="showSection('practice')">Practice</button>
+                <button class="nav-btn" onclick="showSection('nurse-verse')">
+                    Nurse Verse <span class="premium-badge">Premium</span>
+                </button>
+                <button class="nav-btn" onclick="showSection('my-poems')">My Collection</button>
+            </div>
+            <div>
+                <span id="status">Free Account</span>
+                <button class="upgrade-btn" onclick="showPricing()">Upgrade</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div id="alerts"></div>
+
+            <!-- Home -->
+            <div id="home" class="section active">
+                <h2 class="page-title">Welcome to RhymeTime</h2>
+                <p class="page-subtitle">Learn AABB rhyming poetry step by step</p>
+                
+                <div class="card">
+                    <h3>What You'll Learn</h3>
+                    <ul>
+                        <li>Perfect AABB rhyme schemes</li>
+                        <li>Express any topic with confidence</li>
+                        <li><strong>Premium:</strong> Healthcare poetry (Nurse Verse)</li>
+                        <li><strong>Premium:</strong> Advanced lessons & unlimited storage</li>
+                    </ul>
+                    <button class="btn btn-premium" onclick="showPricing()">🚀 Get Premium</button>
+                </div>
+
+                <div class="poem-example">
+                    <strong>Sample AABB Poem:</strong><br><br>
+                    The morning sun begins to rise,<br>
+                    And paints the clouds across the skies.<br>
+                    A brand new day is here at last,<br>
+                    Let worries from yesterday pass.
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">💡 AABB Explained</div>
+                    <p>Lines 1&2 rhyme together, lines 3&4 rhyme together. Build poetry in perfect pairs!</p>
+                </div>
+            </div>
+
+            <!-- Lessons -->
+            <div id="lessons" class="section">
+                <h2 class="page-title">Poetry Lessons</h2>
+                
+                <div class="card">
+                    <h3>Lesson 1: Your First Couplet</h3>
+                    <p>Write two lines that rhyme. Start simple!</p>
+                    
+                    <div class="poem-example">
+                        <strong>Example:</strong><br>
+                        I see a cup upon my desk,<br>
+                        My workspace looking quite a mess.
+                    </div>
+
+                    <textarea id="lesson1" class="textarea" placeholder="Write your two-line poem here..."></textarea>
+                    
+                    <button class="btn" onclick="checkPoem('lesson1')">Check My Rhyme</button>
+                    <button class="btn btn-success" onclick="savePoem('lesson1')">Save Poem</button>
+                </div>
+
+                <div class="card premium-locked">
+                    <div class="premium-overlay">
+                        <div class="lock-icon">🔒</div>
+                        <h3>Premium Lessons</h3>
+                        <p>Unlock advanced AABB training</p>
+                        <button class="btn btn-premium" onclick="showPricing()">Upgrade</button>
+                    </div>
+                    <h3>Lesson 2: Four-Line AABB</h3>
+                    <p>Premium lesson content...</p>
+                </div>
+            </div>
+
+            <!-- Practice -->
+            <div id="practice" class="section">
+                <h2 class="page-title">Practice Zone</h2>
+                
+                <div class="card">
+                    <h3>Free Writing</h3>
+                    <p>Write about anything using AABB rhyme scheme.</p>
+                    
+                    <textarea id="practice-text" class="textarea" placeholder="Let your creativity flow..."></textarea>
+                    
+                    <button class="btn btn-success" onclick="savePoem('practice-text')">Save Poem</button>
+                    <button class="btn" onclick="clearText('practice-text')">Clear</button>
+                </div>
+            </div>
+
+            <!-- Nurse Verse -->
+            <div id="nurse-verse" class="section">
+                <div class="card premium-locked">
+                    <div class="premium-overlay">
+                        <div class="lock-icon">🔒</div>
+                        <h3>Unlock Nurse Verse</h3>
+                        <p>Healthcare poetry features</p>
+                        <button class="btn btn-premium" onclick="showPricing()">Upgrade</button>
+                    </div>
+                    <h2 class="page-title">Nurse Verse</h2>
+                    <p class="page-subtitle">Healthcare poetry for everyone</p>
+                    
+                    <div class="poem-example">
+                        <strong>"The Gentle Healer":</strong><br><br>
+                        She walks the halls with caring grace,<br>
+                        A healing smile upon her face.<br>
+                        Through long night shifts she tends with care,<br>
+                        For those who need her to be there.
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Poems -->
+            <div id="my-poems" class="section">
+                <h2 class="page-title">My Poetry Collection</h2>
+                
+                <div class="card">
+                    <h3>Saved Poems</h3>
+                    <div id="poems-list">
+                        <p style="text-align: center; color: #6b7280; font-style: italic;">
+                            Your poems will appear here
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Manage Collection</h3>
+                    <button class="btn" onclick="exportPoems()">📥 Download</button>
+                    <button class="btn" onclick="clearAllPoems()">🗑️ Clear All</button>
+                    <button class="btn" onclick="debugStripe()" style="background: #6b7280;">🔧 Debug Payments</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Modal -->
+    <div id="pricing-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hidePricing()">&times;</button>
+            <h2 style="text-align: center; margin-bottom: 1rem;">Choose Your Plan</h2>
+            
+            <div class="pricing-card">
+                <h3>Monthly</h3>
+                <div class="price">$12.99<span class="price-period">/month</span></div>
+                <ul style="text-align: left;">
+                    <li>✓ All lessons</li>
+                    <li>✓ Unlimited storage</li>
+                    <li>✓ Nurse Verse access</li>
+                    <li>✓ Export feature</li>
+                </ul>
+                <button class="btn btn-premium" onclick="buyPlan('monthly')" style="width: 100%;">
+                    Buy Monthly Plan
+                </button>
+            </div>
+            
+            <div class="pricing-card popular">
+                <h3>Annual (Best Value)</h3>
+                <div class="price">$99.99<span class="price-period">/year</span></div>
+                <p style="color: #10b981; font-weight: bold;">Save $56!</p>
+                <ul style="text-align: left;">
+                    <li>✓ All monthly features</li>
+                    <li>✓ Priority support</li>
+                    <li>✓ Early access</li>
+                </ul>
+                <button class="btn btn-premium" onclick="buyPlan('annual')" style="width: 100%;">
+                    Buy Annual Plan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL VARIABLES
+        var poems = [];
+        var isPremium = false;
+        
+        // Replace with your actual Stripe keys and price IDs
+        var stripe = Stripe('pk_live_YOUR_PUBLISHABLE_KEY');
+        var MONTHLY_PRICE = 'price_1Rulc9A8YBQHLwrrdg04Lq7Q';
+        var ANNUAL_PRICE = 'price_1Rulw0A8YBQHLwrraBDRAwJp';
+
+        // BASIC FUNCTIONS
+        function showSection(id) {
+            var sections = document.querySelectorAll('.section');
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].classList.remove('active');
+            }
+            
+            var buttons = document.querySelectorAll('.nav-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            if (id === 'my-poems') {
+                showPoems();
+            }
+        }
+
+        function showAlert(message, type) {
+            var alerts = document.getElementById('alerts');
+            alerts.innerHTML = '<div class="alert alert-' + type + '">' + message + '</div>';
+            setTimeout(function() {
+                alerts.innerHTML = '';
+            }, 4000);
+        }
+
+        function checkPoem(id) {
+            var text = document.getElementById(id).value.trim();
+            if (text.length < 10) {
+                showAlert('Keep writing! Add more content.', 'error');
+                return;
+            }
+            
+            var lines = text.split('\n').filter(function(line) {
+                return line.trim().length > 0;
+            });
+            
+            if (lines.length >= 2) {
+                showAlert('Great work! 🎉 You are mastering AABB!', 'success');
+            } else {
+                showAlert('Try writing at least two lines.', 'error');
+            }
+        }
+
+        function savePoem(id) {
+            var text = document.getElementById(id).value.trim();
+            if (text.length < 10) {
+                showAlert('Write more before saving!', 'error');
+                return;
+            }
+            
+            var poem = {
+                content: text,
+                date: new Date().toLocaleDateString(),
+                id: Date.now()
+            };
+            
+            poems.push(poem);
+            localStorage.setItem('rhymeTimePoems', JSON.stringify(poems));
+            showAlert('Poem saved! 📝', 'success');
+            document.getElementById(id).value = '';
+        }
+
+        function clearText(id) {
+            if (confirm('Clear your writing?')) {
+                document.getElementById(id).value = '';
+            }
+        }
+
+        function showPoems() {
+            var container = document.getElementById('poems-list');
+            if (poems.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; font-style: italic;">Your poems will appear here</p>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < poems.length; i++) {
+                var poem = poems[i];
+                html += '<div class="poem-card">' +
+                    '<div class="poem-meta">' +
+                    '<span class="poem-date">' + poem.date + '</span>' +
+                    '<button class="delete-btn" onclick="deletePoem(' + i + ')">Delete</button>' +
+                    '</div>' +
+                    '<div class="poem-content">' + poem.content + '</div>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function deletePoem(index) {
+            if (confirm('Delete this poem?')) {
+                poems.splice(index, 1);
+                localStorage.setItem('rhymeTimePoems', JSON.stringify(poems));
+                showPoems();
+                showAlert('Poem deleted', 'success');
+            }
+        }
+
+        function exportPoems() {
+            if (poems.length === 0) {
+                showAlert('No poems to export!', 'error');
+                return;
+            }
+            
+            var content = 'My RhymeTime Poems\n\n';
+            for (var i = 0; i < poems.length; i++) {
+                content += poems[i].date + '\n' + poems[i].content + '\n\n---\n\n';
+            }
+            
+            var blob = new Blob([content], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'my-poems.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            showAlert('Downloaded! 📥', 'success');
+        }
+
+        function clearAllPoems() {
+            if (confirm('Delete all poems?')) {
+                poems = [];
+                localStorage.removeItem('rhymeTimePoems');
+                showPoems();
+                showAlert('All poems cleared', 'success');
+            }
+        }
+
+        // PREMIUM FUNCTIONS
+        function showPricing() {
+            document.getElementById('pricing-modal').classList.add('show');
+        }
+
+        function hidePricing() {
+            document.getElementById('pricing-modal').classList.remove('show');
+        }
+
+        function buyPlan(plan) {
+            var priceId = plan === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE;
+            
+            // Debug logging
+            console.log('Starting checkout process...');
+            console.log('Plan selected:', plan);
+            console.log('Price ID:', priceId);
+            console.log('Current domain:', window.location.hostname);
+            
+            // Check if we're in an environment that supports payments
+            if (window.location.hostname.includes('claude.ai') || window.location.hostname === 'localhost') {
+                showAlert('⚠️ Payment testing mode: Real payments require your own domain. Activating premium for demo...', 'premium');
+                setTimeout(function() {
+                    activatePremium();
+                    localStorage.setItem('rhymeTimePremium', 'true');
+                    hidePricing();
+                }, 2000);
+                return;
+            }
+            
+            // Validate Stripe is loaded
+            if (!stripe) {
+                showAlert('❌ Stripe not loaded. Check your internet connection.', 'error');
+                return;
+            }
+            
+            // Validate price ID
+            if (!priceId || priceId.includes('YOUR_')) {
+                showAlert('❌ Price ID not configured. Check your Stripe setup.', 'error');
+                return;
+            }
+            
+            showAlert('🔄 Redirecting to Stripe checkout...', 'success');
+            
+            stripe.redirectToCheckout({
+                lineItems: [{ price: priceId, quantity: 1 }],
+                mode: 'subscription',
+                successUrl: window.location.href + '?success=true&plan=' + plan,
+                cancelUrl: window.location.href + '?canceled=true',
+                allowPromotion: true
+            }).then(function(result) {
+                if (result.error) {
+                    console.error('Stripe checkout error:', result.error);
+                    showAlert('❌ Payment failed: ' + result.error.message, 'error');
+                }
+            }).catch(function(error) {
+                console.error('Checkout exception:', error);
+                showAlert('❌ Checkout error: ' + error.message, 'error');
+            });
+        }
+
+        function activatePremium() {
+            isPremium = true;
+            document.getElementById('status').textContent = 'Premium Member';
+            
+            var locks = document.querySelectorAll('.premium-locked');
+            for (var i = 0; i < locks.length; i++) {
+                locks[i].classList.remove('premium-locked');
+            }
+            
+            var overlays = document.querySelectorAll('.premium-overlay');
+            for (var i = 0; i < overlays.length; i++) {
+                overlays[i].style.display = 'none';
+            }
+        }
+
+        function checkPremiumStatus(email) {
+            // In production, this would check your database
+            // For now, check localStorage for demo
+            return localStorage.getItem('rhymeTimePremium') === 'true';
+        }
+
+        function checkPayment() {
+            var url = new URLSearchParams(window.location.search);
+            if (url.get('success') === 'true') {
+                showAlert('🎉 Payment successful! Confirming premium access...', 'success');
+                
+                // In production: check your database for premium status
+                // For demo: activate after short delay to simulate webhook processing
+                setTimeout(function() {
+                    var userEmail = 'user@example.com'; // Get from login system
+                    if (checkPremiumStatus(userEmail)) {
+                        activatePremium();
+                        showAlert('🎉 Premium access activated!', 'success');
+                    }
+                }, 3000);
+                
+                window.history.replaceState({}, '', window.location.pathname);
+            } else if (url.get('canceled') === 'true') {
+                showAlert('Payment canceled', 'error');
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        }
+
+        function debugStripe() {
+            var debug = 'STRIPE DEBUG INFO:\n\n';
+            debug += '✓ Stripe loaded: ' + (typeof Stripe !== 'undefined' ? 'YES' : 'NO') + '\n';
+            debug += '✓ Stripe instance: ' + (stripe ? 'YES' : 'NO') + '\n';
+            debug += '✓ Monthly Price ID: ' + MONTHLY_PRICE + '\n';
+            debug += '✓ Annual Price ID: ' + ANNUAL_PRICE + '\n';
+            debug += '✓ Current domain: ' + window.location.hostname + '\n';
+            debug += '✓ Protocol: ' + window.location.protocol + '\n';
+            debug += '✓ Full URL: ' + window.location.href + '\n\n';
+            
+            debug += 'COMMON ISSUES:\n';
+            debug += '• Domain must be HTTPS for live keys\n';
+            debug += '• Price IDs must exist in your Stripe account\n';
+            debug += '• Publishable key must match your account\n';
+            debug += '• Test keys (pk_test_) only work with test prices\n';
+            debug += '• Live keys (pk_live_) only work with live prices\n\n';
+            
+            debug += 'NEXT STEPS:\n';
+            debug += '1. Check browser console for errors\n';
+            debug += '2. Verify price IDs in Stripe dashboard\n';
+            debug += '3. Ensure domain is added to Stripe settings\n';
+            debug += '4. Test with pk_test_ keys first';
+            
+            alert(debug);
+            console.log('Stripe Debug Info:', {
+                stripeLoaded: typeof Stripe !== 'undefined',
+                stripeInstance: !!stripe,
+                monthlyPrice: MONTHLY_PRICE,
+                annualPrice: ANNUAL_PRICE,
+                domain: window.location.hostname,
+                protocol: window.location.protocol
+            });
+        }
+
+        // LOAD DATA
+        function loadData() {
+            try {
+                var saved = localStorage.getItem('rhymeTimePoems');
+                if (saved) poems = JSON.parse(saved);
+                
+                if (localStorage.getItem('rhymeTimePremium') === 'true') {
+                    activatePremium();
+                }
+            } catch (e) {
+                poems = [];
+            }
+        }
+
+        // CLOSE MODAL ON CLICK OUTSIDE
+        window.onclick = function(event) {
+            var modal = document.getElementById('pricing-modal');
+            if (event.target === modal) {
+                hidePricing();
+            }
+        };
+
+        // START APP
+        loadData();
+        checkPayment();
+    </script>
+</body>
+</html>
