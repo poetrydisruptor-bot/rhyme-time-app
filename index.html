@@ -698,6 +698,12 @@ document.addEventListener('DOMContentLoaded', function () {
     checkPayment(); // sets localStorage + calls activatePremium()
     loadData();     // reads localStorage and updates UI
 });
+  function showSection(id) {
+  document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+}
+        
 </script>
 </body>
 </html>
