@@ -692,18 +692,20 @@ window.onclick = function (event) {
     const modal = document.getElementById('pricing-modal');
     if (event.target === modal) hidePricing();
 };
-
 // Run after DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    checkPayment(); // sets localStorage + calls activatePremium()
-    loadData();     // reads localStorage and updates UI
+  checkPayment(); // updates localStorage + calls activatePremium()
+  loadData();     // reads localStorage and updates UI
 });
-  function showSection(id) {
+
+// Expose to inline onclick handlers
+window.showSection = function (id) {
   document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
   const el = document.getElementById(id);
   if (el) el.style.display = 'block';
-}
-        
+};
+
+
 </script>
 </body>
 </html>
