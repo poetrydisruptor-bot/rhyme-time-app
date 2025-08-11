@@ -771,8 +771,7 @@
   const SUPABASE_URL = "https://yfabmhamqywczdruzjem.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y";
 
-  // Supabase client (CDN exposes global `supabase`)
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Call this after DOM is ready (you already have a DOMContentLoaded; calling here is safe too)
   initAuthAndPremium();
@@ -840,13 +839,6 @@ console.log("Email to match in subscriptions table:", user.email);
 </script>
     <button onclick="loginWithGoogle()">Sign in with Google</button>
 
-<script>
-  function loginWithGoogle() {
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-  }
 </script>
 
 </body>
