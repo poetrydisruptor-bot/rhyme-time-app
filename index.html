@@ -256,6 +256,9 @@
         .price { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
         .price-period { font-size: 1rem; font-weight: normal; color: #6b7280; }
         
+        /* Hide premium badges when premium is active */
+        body.premium .premium-badge { display: none; }
+        
         @media (max-width: 768px) {
             .nav { flex-direction: column; gap: 1rem; }
             .nav-buttons { justify-content: center; }
@@ -407,6 +410,7 @@
                     <button class="btn" onclick="exportPoems()">📥 Download</button>
                     <button class="btn" onclick="clearAllPoems()">🗑️ Clear All</button>
                     <button class="btn" onclick="debugStripe()" style="background: #6b7280;">🔧 Debug Payments</button>
+                    <button class="btn" onclick="forcePremium()" style="background: #10b981;">✅ Test Premium</button>
                 </div>
             </div>
         </div>
@@ -611,62 +615,122 @@
         }
 
         function activatePremium() {
+            console.log('🔧 Activating Premium...');
+            
+            // Save premium status
             localStorage.setItem('rhymeTimePremium', 'true');
             isPremium = true;
 
-            const plan = localStorage.getItem('rhymeTimePlan');
+            // Update status text
+            const plan = localStorage.getItem('rhymeTimePlan') || 'monthly';
             const status = document.getElementById('status');
             if (status) {
-                status.textContent = plan ? `Premium Member (${plan})` : 'Premium Member';
+                status.textContent = `Premium Member (${plan})`;
             }
 
-            document.querySelectorAll('.premium-locked').forEach(el => el.classList.remove('premium-locked'));
-            document.querySelectorAll('.premium-overlay').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('#upgrade, #upgrade-btn, .upgrade, .upgrade-cta, [data-role="upgrade"]').forEach(el => {
-  el.style.display = 'none';
-});
+            // Add premium class to body for global styling
+            document.body.classList.add('premium');
 
+            // Remove all premium locks and overlays
+            document.querySelectorAll('.premium-locked').forEach(el => {
+                el.classList.remove('premium-locked');
+                console.log('🔓 Unlocked:', el);
+            });
+            
+            document.querySelectorAll('.premium-overlay').forEach(el => {
+                el.style.display = 'none';
+                console.log('👻 Hidden overlay:', el);
+            });
+
+            // Hide upgrade buttons
+            document.querySelectorAll('.upgrade-btn, .btn-premium').forEach(el => {
+                if (el.textContent.includes('Get Premium') || el.textContent.includes('Upgrade')) {
+                    el.style.display = 'none';
+                    console.log('🚫 Hidden upgrade button:', el);
+                }
+            });
+
+            console.log('✅ Premium activation complete!');
+            showAlert('🎉 Premium features unlocked!', 'success');
         }
 
-        function checkPremiumStatus(email) {
+        function checkPremiumStatus() {
             return localStorage.getItem('rhymeTimePremium') === 'true';
         }
 
         function checkPayment() {
-            const url = new URLSearchParams(window.location.search);
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Check for multiple possible success indicators
+            const hasSuccess = urlParams.get('success') === 'true' || 
+                              urlParams.get('payment_success') === 'true' ||
+                              urlParams.get('session_id') || 
+                              urlParams.get('checkout_success') === 'true';
 
-            if (url.get('success') === 'true') {
-                const plan = (url.get('plan') || 'monthly').toLowerCase();
-
+            if (hasSuccess) {
+                console.log('💳 Payment success detected!');
+                
+                const plan = urlParams.get('plan') || urlParams.get('price_id') || 'monthly';
+                
+                // Save premium status
                 localStorage.setItem('rhymeTimePremium', 'true');
-                localStorage.setItem('rhymeTimePlan', plan);
+                localStorage.setItem('rhymeTimePlan', plan.toLowerCase());
 
+                // Activate premium immediately
                 activatePremium();
+                
+                // Clean URL to remove payment parameters
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                
                 showAlert(`🎉 Welcome to Premium! (${plan} plan)`, 'success');
             }
         }
 
         function loadData() {
             try {
+                // Load saved poems
                 var saved = localStorage.getItem('rhymeTimePoems');
                 if (saved) poems = JSON.parse(saved);
 
-                if (localStorage.getItem('rhymeTimePremium') === 'true') {
+                // Check if user already has premium
+                if (checkPremiumStatus()) {
+                    console.log('🔍 Existing premium status found');
                     activatePremium();
                 }
-
-                const plan = localStorage.getItem('rhymeTimePlan');
-                if (plan) {
-                    const status = document.getElementById('status');
-                    if (status) status.textContent = `Premium Member (${plan})`;
-                }
             } catch (e) {
+                console.error('Error loading data:', e);
                 poems = [];
             }
         }
 
         function debugStripe() {
-            showAlert('Debug: Premium status = ' + localStorage.getItem('rhymeTimePremium'), 'success');
+            const isPrem = localStorage.getItem('rhymeTimePremium');
+            const plan = localStorage.getItem('rhymeTimePlan');
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            let debug = `Premium Status: ${isPrem}\n`;
+            debug += `Plan: ${plan}\n`;
+            debug += `URL Params: ${window.location.search}\n`;
+            debug += `Body has premium class: ${document.body.classList.contains('premium')}`;
+            
+            alert(debug);
+            console.log('🔧 Debug Info:', {
+                isPremium: isPrem,
+                plan: plan,
+                urlParams: Object.fromEntries(urlParams),
+                bodyHasPremiumClass: document.body.classList.contains('premium')
+            });
+        }
+
+        // Test function to manually activate premium
+        function forcePremium() {
+            if (confirm('Force activate premium for testing?')) {
+                localStorage.setItem('rhymeTimePremium', 'true');
+                localStorage.setItem('rhymeTimePlan', 'test');
+                activatePremium();
+            }
         }
 
         // Close pricing modal when clicking outside it
@@ -687,11 +751,14 @@
         window.exportPoems = exportPoems;
         window.clearAllPoems = clearAllPoems;
         window.debugStripe = debugStripe;
+        window.forcePremium = forcePremium;
 
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function () {
-            checkPayment();
-            loadData();
+            console.log('🚀 RhymeTime starting up...');
+            checkPayment();  // Check for successful payment first
+            loadData();      // Then load existing data
+            console.log('✅ RhymeTime ready!');
         });
     </script>
 </body>
