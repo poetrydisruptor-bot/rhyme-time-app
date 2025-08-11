@@ -655,6 +655,44 @@
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
+       // Handle Stripe redirect before loading data
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('success') === 'true') {
+    const plan = urlParams.get('plan'); // "monthly" or "annual"
+    if (plan) {
+        localStorage.setItem('rhymeTimePremium', 'true');
+        localStorage.setItem('rhymeTimePlan', plan);
+
+        alert(`✅ Thank you! Premium ${plan} plan activated.`);
+
+        // Remove query params from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+// Existing function starts here
+function loadData() {
+    try {
+        var saved = localStorage.getItem('rhymeTimePoems');
+        if (saved) poems = JSON.parse(saved);
+
+        // If user already has premium saved, turn it on
+        if (localStorage.getItem('rhymeTimePremium') === 'true') {
+            activatePremium();
+        }
+
+        // Show stored plan in the header
+        const plan = localStorage.getItem('rhymeTimePlan');
+        if (plan) {
+            const status = document.getElementById('status');
+            if (status) status.textContent = `Premium Member (${plan})`;
+        }
+
+    } catch (e) {
+        poems = [];
+    }
+}
+ 
       function loadData() {
   try {
     var saved = localStorage.getItem('rhymeTimePoems');
