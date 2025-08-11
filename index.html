@@ -680,26 +680,27 @@ function loadData() {
         if (plan) {
             const status = document.getElementById('status');
             if (status) status.textContent = `Premium Member (${plan})`;
+
         }
 
     } catch (e) {
         poems = [];
-    }
   
 }
-      // Close pricing modal when clicking outside it
-      window.onclick = function (event) {
-        var modal = document.getElementById('pricing-modal');
-        if (event.target === modal) {
-          hidePricing();
-        }
-      };
+    <!-- Close pricing modal on outside click -->
+<script>
+  // Close pricing modal when clicking outside it
+  window.onclick = function (event) {
+    const modal = document.getElementById('pricing-modal');
+    if (event.target === modal) hidePricing();
+  };
 
-  document.addEventListener('DOMContentLoaded', () => {
-  checkPayment();   // sets localStorage + activates
-  loadData();       // reads localStorage and updates UI
-});
-      
-    </script>
-  </body>
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', function () {
+    checkPayment(); // sets localStorage + calls activatePremium()
+    loadData();     // reads localStorage and updates UI
+  });
+</script>
+</body>
 </html>
+ 
