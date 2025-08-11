@@ -651,19 +651,19 @@
     localStorage.setItem('rhymeTimePlan', plan);
 
     // update UI now
-    activatePremium();
+ function activatePremium() {
+    localStorage.setItem('rhymeTimePremium', 'true'); // save first
+    isPremium = true;
+
+    const plan = localStorage.getItem('rhymeTimePlan'); // "monthly" or "annual"
     const status = document.getElementById('status');
-    if (status) status.textContent = `Premium Member (${plan})`;
-    showAlert(`🎉 Payment successful! Premium ${plan} activated.`, 'success');
+    if (status) {
+        status.textContent = plan ? `Premium Member (${plan})` : 'Premium Member';
+    }
 
-    // clean the URL so refresh doesn't retrigger
-    window.history.replaceState({}, '', window.location.pathname);
-  } else if (url.get('canceled') === 'true') {
-    showAlert('Payment canceled', 'error');
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-}
-
+    document.querySelectorAll('.premium-locked').forEach(el => el.classList.remove('premium-locked'));
+    document.querySelectorAll('.premium-overlay').forEach(el => el.style.display = 'none');
+     }
 function loadData() {
     try {
         var saved = localStorage.getItem('rhymeTimePoems');
@@ -714,10 +714,11 @@ function loadData() {
         }
       };
 
-     document.addEventListener('DOMContentLoaded', () => {
-  loadData();
-  checkPayment();
-     });      
+  document.addEventListener('DOMContentLoaded', () => {
+  checkPayment();   // sets localStorage + activates
+  loadData();       // reads localStorage and updates UI
+});
+      
     </script>
   </body>
 </html>
