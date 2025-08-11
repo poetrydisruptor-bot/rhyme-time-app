@@ -838,5 +838,16 @@ console.log("Email to match in subscriptions table:", user.email);
 }
 
 </script>
+    <button onclick="loginWithGoogle()">Sign in with Google</button>
+
+<script>
+  function loginWithGoogle() {
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  }
+</script>
+
 </body>
 </html>
