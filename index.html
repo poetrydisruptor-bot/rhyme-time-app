@@ -761,5 +761,82 @@
             console.log('✅ RhymeTime ready!');
         });
     </script>
+    <!-- your existing scripts -->
+<script>
+  /* ... your current JavaScript ... */
+</script>
+
+<!-- new Supabase login & premium check script -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script><script>
+  const SUPABASE_URL = "https://yfabmhamqywczdruzjem.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y";
+
+  // Supabase client (CDN exposes global `supabase`)
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Call this after DOM is ready (you already have a DOMContentLoaded; calling here is safe too)
+  initAuthAndPremium();
+
+  async function initAuthAndPremium() {
+    // 1) Check login
+    const { data: { user } } = await sb.auth.getUser();
+
+    if (!user) {
+  console.log("Not logged in");
+  // OPTIONAL: show a "Log in" button if you have one
+  // document.getElementById('login-btn')?.classList.remove('hidden');
+  return;
+}
+
+// DEBUG: make sure this matches the email in your Supabase subscriptions table
+console.log("Supabase user object:", user);
+console.log("Email to match in subscriptions table:", user.email);
+    }
+
+    // 2) Check subscriptions table for active sub
+    const { data, error } = await sb
+      .from('subscriptions')
+      .select('status, plan')
+      .eq('email', user.email)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Sub lookup error:', error);
+      return;
+    }
+
+    if (data) {
+      // Persist + update UI using your existing functions
+      localStorage.setItem('rhymeTimePremium', 'true');
+      localStorage.setItem('rhymeTimePlan', data.plan || 'monthly');
+      if (typeof activatePremium === 'function') activatePremium();
+      // Hide any upgrade buttons
+      document.querySelectorAll('#upgrade, .upgrade-btn, .upgrade, .upgrade-cta, [data-role="upgrade"]')
+        .forEach(el => el.style.display = 'none');
+      console.log('Premium unlocked from Supabase:', data.plan);
+    } else {
+      console.log('No active subscription for this user.');
+    }
+  }
+
+  // SIMPLE LOGIN/LOGOUT (optional, only if you add buttons with these IDs)
+  // Google OAuth (enable Google in Supabase Auth providers)
+  window.loginWithGoogle = async () => {
+    await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  };
+
+  window.logout = async () => {
+    await sb.auth.signOut();
+    localStorage.removeItem('rhymeTimePremium');
+    localStorage.removeItem('rhymeTimePlan');
+    window.location.reload();
+  }
+}
+
+</script>
 </body>
 </html>
