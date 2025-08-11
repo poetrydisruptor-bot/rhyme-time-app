@@ -622,6 +622,10 @@
 
             document.querySelectorAll('.premium-locked').forEach(el => el.classList.remove('premium-locked'));
             document.querySelectorAll('.premium-overlay').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#upgrade, #upgrade-btn, .upgrade, .upgrade-cta, [data-role="upgrade"]').forEach(el => {
+  el.style.display = 'none';
+});
+
         }
 
         function checkPremiumStatus(email) {
