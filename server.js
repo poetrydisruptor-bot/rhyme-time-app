@@ -2,16 +2,24 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
+
+// Supabase client (Service Role key)
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // --- Stripe webhook route (raw body) ---
 app.post(
   '/stripe-webhook',
   express.raw({ type: 'application/json' }),
-  (req, res) => {
+  async (req, res) => {
     const sig = req.headers['stripe-signature'];
+
     try {
       const event = stripe.webhooks.constructEvent(
         req.body,
@@ -20,8 +28,61 @@ app.post(
       );
 
       if (event.type === 'checkout.session.completed') {
-        console.log('✅ Payment succeeded');
-        // Your logic here
+        const sessionId = event.data.object.id;
+
+        // Pull full session with line items for plan info
+        const session = await stripe.checkout.sessions.retrieve(sessionId, {
+          expand: ['line_items.data.price']
+        });
+
+        const email = session.customer_details?.email || null;
+        const customerId = session.customer || null;
+        const subscriptionId = session.subscription || null;
+
+        let plan = null;
+        let status = 'active';
+        let current_period_start = null;
+        let current_period_end = null;
+        let canceled_at = null;
+
+        if (subscriptionId) {
+          const sub = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data.price']
+          });
+
+          plan = sub.items.data[0]?.price?.recurring?.interval || null; // 'month' or 'year'
+          current_period_start = new Date(sub.current_period_start * 1000).toISOString();
+          current_period_end = new Date(sub.current_period_end * 1000).toISOString();
+          canceled_at = sub.canceled_at
+            ? new Date(sub.canceled_at * 1000).toISOString()
+            : null;
+          status = sub.status; // active, canceled, etc.
+        }
+
+        const { error } = await supabase
+          .from('subscriptions')
+          .upsert(
+            {
+              email,
+              plan,
+              status,
+              current_period_start,
+              current_period_end,
+              stripe_subscription_id: subscriptionId,
+              stripe_customer_id: customerId,
+              canceled_at
+            },
+            { onConflict: 'email' }
+          );
+
+        if (error) {
+          console.error('Supabase insert/update error:', error);
+          return res.status(500).send('DB error');
+        }
+
+        console.log(
+          `✅ Subscription recorded for ${email} — Plan: ${plan}, Status: ${status}`
+        );
       }
 
       res.json({ received: true });
@@ -32,7 +93,7 @@ app.post(
   }
 );
 
-// --- Middleware for normal routes ---
+// --- Regular middleware AFTER webhook route ---
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
