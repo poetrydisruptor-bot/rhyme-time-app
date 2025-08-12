@@ -1,41 +1,57 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.static(path.join(__dirname, 'public')));
+// --- Stripe webhook route (raw body) ---
+app.post(
+  '/stripe-webhook',
+  express.raw({ type: 'application/json' }),
+  (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+
+      if (event.type === 'checkout.session.completed') {
+        console.log('✅ Payment succeeded');
+        // Your logic here
+      }
+
+      res.json({ received: true });
+    } catch (err) {
+      console.error('Stripe webhook error:', err.message);
+      res.status(400).send('Webhook error');
+    }
+  }
+);
+
+// --- Middleware for normal routes ---
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// --- API routes ---
+app.get('/api/hello', (_req, res) => {
+  res.json({ ok: true, message: 'Hello from Rhyme Time API!' });
 });
 
-// Stripe webhook example (optional for subscription updates)
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
+app.get('/health', (_req, res) => res.send('ok'));
 
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error(`Webhook signature verification failed.`, err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    console.log(`✅ Checkout complete: ${session.customer_email}`);
-    // Here you’d update Supabase subscription table
-  }
-
-  res.json({ received: true });
+// --- Static files ---
+app.use(express.static(path.join(__dirname)));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve index.html for all other routes
-app.get('*
+// --- Start server ---
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server listening on ${PORT}`);
+});
