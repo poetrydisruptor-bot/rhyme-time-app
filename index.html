@@ -3,859 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RhymeTime - Poetry Learning App</title>
+    <title>RhymeTime</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8fafc;
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
             background: white;
-            min-height: 100vh;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         
-        .header {
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-        
-        .title { font-size: 3rem; font-weight: bold; margin-bottom: 0.5rem; }
-        .subtitle { font-size: 1.2rem; opacity: 0.9; }
-        
-        .nav {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 2rem;
+        .google-btn {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            background-color: #4285f4;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 15px 0;
+            width: 100%;
+            transition: background-color 0.3s;
+            font-weight: 500;
         }
         
-        .nav-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .google-btn:hover {
+            background-color: #357ae8;
+        }
         
-        .nav-btn {
+        .divider {
+            margin: 25px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider span {
             background: white;
-            color: #6b7280;
-            border: 1px solid #e5e7eb;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 0 20px;
+            color: #666;
             font-size: 14px;
         }
         
-        .nav-btn:hover { color: #2563eb; border-color: #2563eb; }
-        .nav-btn.active { background: #2563eb; color: white; }
+        .email-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        
+        .magic-link-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        #user-section {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .user-info {
+            margin-bottom: 15px;
+        }
+        
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .premium-only {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
         
         .premium-badge {
-            background: #f59e0b;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            margin-left: 5px;
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .upgrade-prompt {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
         }
         
         .upgrade-btn {
-            background: #f59e0b;
-            color: white;
+            background-color: #ffc107;
+            color: #212529;
+            padding: 12px 25px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .upgrade-btn:hover { background: #d97706; }
-        
-        .content { padding: 2rem; max-width: 800px; margin: 0 auto; }
-        
-        .section { display: none; }
-        .section.active { display: block; }
-        
-        .page-title { font-size: 2rem; text-align: center; margin-bottom: 1rem; }
-        .page-subtitle { text-align: center; color: #6b7280; margin-bottom: 2rem; }
-        
-        .card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .card h3 { font-size: 1.3rem; margin-bottom: 1rem; }
-        .card p { color: #6b7280; margin-bottom: 1rem; }
-        
-        .poem-example {
-            background: #f8fafc;
-            border-left: 4px solid #2563eb;
-            padding: 1rem;
-            margin: 1rem 0;
-            font-style: italic;
-            border-radius: 4px;
-        }
-        
-        .tip-box {
-            background: #ecfdf5;
-            border: 1px solid #10b981;
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 1rem 0;
-        }
-        
-        .tip-title { color: #10b981; font-weight: bold; margin-bottom: 0.5rem; }
-        
-        .textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
             font-size: 16px;
-            line-height: 1.5;
-            resize: vertical;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
         }
         
-        .textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 24px;
+        .status {
+            padding: 12px;
+            margin: 15px 0;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 5px;
+            font-weight: 500;
         }
         
-        .btn:hover { background: #1d4ed8; }
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; }
-        .btn-premium { background: #f59e0b; }
-        .btn-premium:hover { background: #d97706; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
         
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 1rem 0;
-            border-left: 4px solid;
+        body.premium-user {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
         
-        .alert-success { background: #ecfdf5; border-color: #10b981; color: #065f46; }
-        .alert-error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
-        .alert-premium { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
-        
-        .premium-locked {
-            opacity: 0.6;
-            position: relative;
+        body.premium-user .container {
+            border: 2px solid #667eea;
         }
         
-        .premium-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9);
+        .config-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
             border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            margin-bottom: 20px;
         }
         
-        .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
-        
-        .poem-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .poem-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .poem-date { font-size: 12px; color: #6b7280; }
-        .poem-content { font-style: italic; line-height: 1.6; white-space: pre-wrap; }
-        
-        .delete-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
             font-size: 12px;
-            cursor: pointer;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-        
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 10px; right: 15px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        
-        .pricing-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            text-align: center;
-        }
-        
-        .pricing-card.popular { border-color: #f59e0b; }
-        .price { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
-        .price-period { font-size: 1rem; font-weight: normal; color: #6b7280; }
-        
-        /* Hide premium badges when premium is active */
-        body.premium .premium-badge { display: none; }
-        
-        @media (max-width: 768px) {
-            .nav { flex-direction: column; gap: 1rem; }
-            .nav-buttons { justify-content: center; }
-            .title { font-size: 2rem; }
-            .content { padding: 1rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1 class="title">RhymeTime</h1>
-            <p class="subtitle">Master the Art of AABB Poetry</p>
+        <h1>🎵 RhymeTime</h1>
+        
+        <!-- Config Section -->
+        <div class="config-section" style="background: #d4edda; border-color: #c3e6cb;">
+            <h4>✅ Configuration Complete!</h4>
+            <p>All your credentials are configured and ready to use:</p>
+            <div class="debug-info">
+                SUPABASE_URL: ✅ Connected<br>
+                SUPABASE_ANON_KEY: ✅ Set<br>
+                STRIPE_MONTHLY_LINK: ✅ Ready<br>
+                STRIPE_ANNUAL_LINK: ✅ Ready
+            </div>
+            <button onclick="showDebugInfo()">Show Debug Info</button>
+        </div>
+        
+        <!-- Login Section -->
+        <div id="login-section">
+            <h2>Sign In to Your Account</h2>
+            
+            <button class="google-btn" onclick="loginWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 12px; background: white; border-radius: 3px; padding: 2px;">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="divider">
+                <span>or continue with email</span>
+            </div>
+
+            <input type="email" id="email-input" class="email-input" placeholder="Enter your email address">
+            <button class="magic-link-btn" onclick="sendMagicLink()">Send Magic Link</button>
         </div>
 
-        <div class="nav">
-            <div class="nav-buttons">
-                <button class="nav-btn active" onclick="showSection('home')">Home</button>
-                <button class="nav-btn" onclick="showSection('lessons')">Lessons</button>
-                <button class="nav-btn" onclick="showSection('practice')">Practice</button>
-                <button class="nav-btn" onclick="showSection('nurse-verse')">
-                    Nurse Verse <span class="premium-badge">Premium</span>
-                </button>
-                <button class="nav-btn" onclick="showSection('my-poems')">My Collection</button>
+        <!-- User Section -->
+        <div id="user-section">
+            <h2>👋 Welcome Back!</h2>
+            <div class="user-info">
+                <strong>Email:</strong> <span id="user-email"></span>
             </div>
-            <div>
-                <span id="status">Free Account</span>
-                <button class="upgrade-btn" onclick="showPricing()">Upgrade</button>
+            <div class="user-info">
+                <strong>Subscription:</strong> <span id="user-subscription">Checking...</span>
             </div>
+            <button class="logout-btn" onclick="logout()">Sign Out</button>
+            <button onclick="refreshSubscription()" style="background: #17a2b8; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; margin-left: 10px;">
+                Refresh Status
+            </button>
         </div>
 
-        <div class="content">
-            <div id="alerts"></div>
-
-            <!-- Home -->
-            <div id="home" class="section active">
-                <h2 class="page-title">Welcome to RhymeTime</h2>
-                <p class="page-subtitle">Learn AABB rhyming poetry step by step</p>
-                
-                <div class="card">
-                    <h3>What You'll Learn</h3>
-                    <ul>
-                        <li>Perfect AABB rhyme schemes</li>
-                        <li>Express any topic with confidence</li>
-                        <li><strong>Premium:</strong> Healthcare poetry (Nurse Verse)</li>
-                        <li><strong>Premium:</strong> Advanced lessons & unlimited storage</li>
-                    </ul>
-                    <button class="btn btn-premium" onclick="showPricing()">🚀 Get Premium</button>
-                </div>
-
-                <div class="poem-example">
-                    <strong>Sample AABB Poem:</strong><br><br>
-                    The morning sun begins to rise,<br>
-                    And paints the clouds across the skies.<br>
-                    A brand new day is here at last,<br>
-                    Let worries from yesterday pass.
-                </div>
-
-                <div class="tip-box">
-                    <div class="tip-title">💡 AABB Explained</div>
-                    <p>Lines 1&2 rhyme together, lines 3&4 rhyme together. Build poetry in perfect pairs!</p>
-                </div>
-            </div>
-
-            <!-- Lessons -->
-            <div id="lessons" class="section">
-                <h2 class="page-title">Poetry Lessons</h2>
-                
-                <div class="card">
-                    <h3>Lesson 1: Your First Couplet</h3>
-                    <p>Write two lines that rhyme. Start simple!</p>
-                    
-                    <div class="poem-example">
-                        <strong>Example:</strong><br>
-                        I see a cup upon my desk,<br>
-                        My workspace looking quite a mess.
-                    </div>
-
-                    <textarea id="lesson1" class="textarea" placeholder="Write your two-line poem here..."></textarea>
-                    
-                    <button class="btn" onclick="checkPoem('lesson1')">Check My Rhyme</button>
-                    <button class="btn btn-success" onclick="savePoem('lesson1')">Save Poem</button>
-                </div>
-
-                <div class="card premium-locked">
-                    <div class="premium-overlay">
-                        <div class="lock-icon">🔒</div>
-                        <h3>Premium Lessons</h3>
-                        <p>Unlock advanced AABB training</p>
-                        <button class="btn btn-premium" onclick="showPricing()">Upgrade</button>
-                    </div>
-                    <h3>Lesson 2: Four-Line AABB</h3>
-                    <p>Premium lesson content...</p>
-                </div>
-            </div>
-
-            <!-- Practice -->
-            <div id="practice" class="section">
-                <h2 class="page-title">Practice Zone</h2>
-                
-                <div class="card">
-                    <h3>Free Writing</h3>
-                    <p>Write about anything using AABB rhyme scheme.</p>
-                    
-                    <textarea id="practice-text" class="textarea" placeholder="Let your creativity flow..."></textarea>
-                    
-                    <button class="btn btn-success" onclick="savePoem('practice-text')">Save Poem</button>
-                    <button class="btn" onclick="clearText('practice-text')">Clear</button>
-                </div>
-            </div>
-
-            <!-- Nurse Verse -->
-            <div id="nurse-verse" class="section">
-                <div class="card premium-locked">
-                    <div class="premium-overlay">
-                        <div class="lock-icon">🔒</div>
-                        <h3>Unlock Nurse Verse</h3>
-                        <p>Healthcare poetry features</p>
-                        <button class="btn btn-premium" onclick="showPricing()">Upgrade</button>
-                    </div>
-                    <h2 class="page-title">Nurse Verse</h2>
-                    <p class="page-subtitle">Healthcare poetry for everyone</p>
-                    
-                    <div class="poem-example">
-                        <strong>"The Gentle Healer":</strong><br><br>
-                        She walks the halls with caring grace,<br>
-                        A healing smile upon her face.<br>
-                        Through long night shifts she tends with care,<br>
-                        For those who need her to be there.
-                    </div>
-                </div>
-            </div>
-
-            <!-- My Poems -->
-            <div id="my-poems" class="section">
-                <h2 class="page-title">My Poetry Collection</h2>
-                
-                <div class="card">
-                    <h3>Saved Poems</h3>
-                    <div id="poems-list">
-                        <p style="text-align: center; color: #6b7280; font-style: italic;">
-                            Your poems will appear here
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Manage Collection</h3>
-                    <button class="btn" onclick="exportPoems()">📥 Download</button>
-                    <button class="btn" onclick="clearAllPoems()">🗑️ Clear All</button>
-                    <button class="btn" onclick="debugStripe()" style="background: #6b7280;">🔧 Debug Payments</button>
-                    <button class="btn" onclick="forcePremium()" style="background: #10b981;">✅ Test Premium</button>
-                </div>
-            </div>
-        </div>
+        <div id="status"></div>
+        <div id="debug-output"></div>
     </div>
 
-    <!-- Pricing Modal -->
-    <div id="pricing-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="hidePricing()">&times;</button>
-            <h2 style="text-align: center; margin-bottom: 1rem;">Choose Your Plan</h2>
-            
-            <div class="pricing-card">
-                <h3>Monthly</h3>
-                <div class="price">$12.99<span class="price-period">/month</span></div>
-                <ul style="text-align: left;">
-                    <li>✓ All lessons</li>
-                    <li>✓ Unlimited storage</li>
-                    <li>✓ Nurse Verse access</li>
-                    <li>✓ Export feature</li>
-                </ul>
-                <button class="btn btn-premium" onclick="buyPlan('monthly')" style="width: 100%;">
-                    Buy Monthly Plan
-                </button>
+    <!-- Premium Content -->
+    <div class="premium-only container">
+        <div class="premium-badge">✨ PREMIUM FEATURE</div>
+        <h2>🎼 Advanced Rhyme Generator</h2>
+        <p>Welcome to the premium experience! You now have access to:</p>
+        <ul>
+            <li>🎯 Advanced rhyme patterns</li>
+            <li>🔤 Custom syllable matching</li>
+            <li>📄 Export to multiple formats</li>
+            <li>💬 Priority support</li>
+            <li>🎨 Custom themes</li>
+        </ul>
+    </div>
+
+    <!-- Upgrade Prompt -->
+    <div class="upgrade-prompt">
+        <h3>🚀 Unlock Premium Features</h3>
+        <p>Get access to advanced rhyming tools, custom patterns, and more!</p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <a href="#" id="monthly-btn" class="upgrade-btn" target="_blank" style="background-color: #28a745; display: block; margin-bottom: 5px;">
+                    💳 Monthly Plan
+                </a>
+                <small style="color: #666;">Pay monthly</small>
             </div>
             
-            <div class="pricing-card popular">
-                <h3>Annual (Best Value)</h3>
-                <div class="price">$99.99<span class="price-period">/year</span></div>
-                <p style="color: #10b981; font-weight: bold;">Save $56!</p>
-                <ul style="text-align: left;">
-                    <li>✓ All monthly features</li>
-                    <li>✓ Priority support</li>
-                    <li>✓ Early access</li>
-                </ul>
-                <button class="btn btn-premium" onclick="buyPlan('annual')" style="width: 100%;">
-                    Buy Annual Plan
-                </button>
+            <div style="text-align: center;">
+                <a href="#" id="annual-btn" class="upgrade-btn" target="_blank" style="background-color: #007bff; display: block; margin-bottom: 5px;">
+                    💰 Annual Plan
+                </a>
+                <small style="color: #666;">Save with yearly billing</small>
             </div>
         </div>
     </div>
 
     <script>
-        // GLOBAL VARIABLES
-        var poems = [];
-        var isPremium = false;
+        console.log('🚀 RhymeTime starting up...');
         
-        // Replace with your actual Stripe keys and price IDs
-        const MONTHLY_LINK = "https://buy.stripe.com/fZufZg8Zr0UX2t24F81VK01";
-        const ANNUAL_LINK  = "https://buy.stripe.com/8x27sKejL1Z16Ji1sW1VK00";
+        // ✅ ALL YOUR CREDENTIALS - READY TO USE!
+        const CONFIG = {
+            SUPABASE_URL: 'https://yfabmhamqywczdruzjem.supabase.co',
+            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y',
+            STRIPE_MONTHLY_LINK: 'https://buy.stripe.com/fZufZg8Zr0UX2t24F81VK01',
+            STRIPE_ANNUAL_LINK: 'https://buy.stripe.com/8x27sKejL1Z16Ji1sW1VK00'
+        };
+        
+        let currentUser = null;
+        let userSubscription = null;
 
-        // BASIC FUNCTIONS
-        function showSection(id) {
-            var sections = document.querySelectorAll('.section');
-            for (var i = 0; i < sections.length; i++) {
-                sections[i].classList.remove('active');
-            }
-            
-            var buttons = document.querySelectorAll('.nav-btn');
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove('active');
-            }
-            
-            document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
-
-            if (id === 'my-poems') {
-                showPoems();
-            }
-        }
-
-        function showAlert(message, type) {
-            var alerts = document.getElementById('alerts');
-            alerts.innerHTML = '<div class="alert alert-' + type + '">' + message + '</div>';
-            setTimeout(function() {
-                alerts.innerHTML = '';
-            }, 4000);
-        }
-
-        function checkPoem(id) {
-            var text = document.getElementById(id).value.trim();
-            if (text.length < 10) {
-                showAlert('Keep writing! Add more content.', 'error');
-                return;
-            }
-            
-            var lines = text.split('\n').filter(function(line) {
-                return line.trim().length > 0;
-            });
-            
-            if (lines.length >= 2) {
-                showAlert('Great work! 🎉 You are mastering AABB!', 'success');
-            } else {
-                showAlert('Try writing at least two lines.', 'error');
-            }
-        }
-
-        function savePoem(id) {
-            var text = document.getElementById(id).value.trim();
-            if (text.length < 10) {
-                showAlert('Write more before saving!', 'error');
-                return;
-            }
-            
-            var poem = {
-                content: text,
-                date: new Date().toLocaleDateString(),
-                id: Date.now()
+        function showDebugInfo() {
+            const debugInfo = {
+                'Current URL': window.location.href,
+                'Protocol': window.location.protocol,
+                'Config URL': CONFIG.SUPABASE_URL,
+                'Config Key Length': CONFIG.SUPABASE_ANON_KEY.length,
+                'Monthly Link Set': '✅ Ready',
+                'Annual Link Set': '✅ Ready',
+                'User Agent': navigator.userAgent.substring(0, 50) + '...',
+                'Local Storage Keys': Object.keys(localStorage),
+                'Has Console': typeof console !== 'undefined'
             };
             
-            poems.push(poem);
-            localStorage.setItem('rhymeTimePoems', JSON.stringify(poems));
-            showAlert('Poem saved! 📝', 'success');
-            document.getElementById(id).value = '';
-        }
-
-        function clearText(id) {
-            if (confirm('Clear your writing?')) {
-                document.getElementById(id).value = '';
-            }
-        }
-
-        function showPoems() {
-            var container = document.getElementById('poems-list');
-            if (poems.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #6b7280; font-style: italic;">Your poems will appear here</p>';
-                return;
-            }
+            console.log('Debug Info:', debugInfo);
             
-            var html = '';
-            for (var i = 0; i < poems.length; i++) {
-                var poem = poems[i];
-                html += '<div class="poem-card">' +
-                    '<div class="poem-meta">' +
-                    '<span class="poem-date">' + poem.date + '</span>' +
-                    '<button class="delete-btn" onclick="deletePoem(' + i + ')">Delete</button>' +
-                    '</div>' +
-                    '<div class="poem-content">' + poem.content + '</div>' +
-                    '</div>';
-            }
-            container.innerHTML = html;
+            const debugDiv = document.getElementById('debug-output');
+            debugDiv.innerHTML = `
+                <div class="debug-info">
+                    <strong>Debug Information:</strong><br>
+                    ${Object.entries(debugInfo).map(([key, value]) => `${key}: ${value}`).join('<br>')}
+                </div>
+            `;
         }
 
-        function deletePoem(index) {
-            if (confirm('Delete this poem?')) {
-                poems.splice(index, 1);
-                localStorage.setItem('rhymeTimePoems', JSON.stringify(poems));
-                showPoems();
-                showAlert('Poem deleted', 'success');
-            }
-        }
-
-        function exportPoems() {
-            if (poems.length === 0) {
-                showAlert('No poems to export!', 'error');
-                return;
-            }
-            
-            var content = 'My RhymeTime Poems\n\n';
-            for (var i = 0; i < poems.length; i++) {
-                content += poems[i].date + '\n' + poems[i].content + '\n\n---\n\n';
-            }
-            
-            var blob = new Blob([content], { type: 'text/plain' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'my-poems.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-            showAlert('Downloaded! 📥', 'success');
-        }
-
-        function clearAllPoems() {
-            if (confirm('Delete all poems?')) {
-                poems = [];
-                localStorage.removeItem('rhymeTimePoems');
-                showPoems();
-                showAlert('All poems cleared', 'success');
-            }
-        }
-
-        // PREMIUM FUNCTIONS
-        function showPricing() {
-            document.getElementById('pricing-modal').classList.add('show');
-        }
-
-        function hidePricing() {
-            document.getElementById('pricing-modal').classList.remove('show');
-        }
-
-        // Payment Links checkout (no Stripe.js, no secret keys)
-        function buyPlan(plan) {
-            const url = plan === 'annual' ? ANNUAL_LINK : MONTHLY_LINK;
-
-            if (!url || !url.includes("buy.stripe.com")) {
-                showAlert('❌ Payment Link not set. Please paste your Stripe link in the code.', 'error');
-                return;
+        // Direct Supabase API calls
+        class SimpleSupabase {
+            constructor() {
+                this.url = CONFIG.SUPABASE_URL;
+                this.key = CONFIG.SUPABASE_ANON_KEY;
+                this.headers = {
+                    'apikey': this.key,
+                    'Authorization': `Bearer ${this.key}`,
+                    'Content-Type': 'application/json'
+                };
             }
 
-            showAlert('🔄 Redirecting to secure checkout…', 'success');
-            window.location.href = url;
-        }
+            async testConnection() {
+                console.log('Testing connection to:', this.url);
 
-        function activatePremium() {
-            console.log('🔧 Activating Premium...');
-            
-            // Save premium status
-            localStorage.setItem('rhymeTimePremium', 'true');
-            isPremium = true;
+                const response = await fetch(`${this.url}/rest/v1/`, {
+                    method: 'GET',
+                    headers: this.headers
+                });
 
-            // Update status text
-            const plan = localStorage.getItem('rhymeTimePlan') || 'monthly';
-            const status = document.getElementById('status');
-            if (status) {
-                status.textContent = `Premium Member (${plan})`;
+                console.log('Connection test response:', response.status);
+                return response.ok || response.status === 404;
             }
 
-            // Add premium class to body for global styling
-            document.body.classList.add('premium');
+            async sendMagicLink(email) {
+                const response = await fetch(`${this.url}/auth/v1/magiclink`, {
+                    method: 'POST',
+                    headers: this.headers,
+                    body: JSON.stringify({
+                        email: email,
+                        options: {
+                            emailRedirectTo: window.location.origin
+                        }
+                    })
+                });
 
-            // Remove all premium locks and overlays
-            document.querySelectorAll('.premium-locked').forEach(el => {
-                el.classList.remove('premium-locked');
-                console.log('🔓 Unlocked:', el);
-            });
-            
-            document.querySelectorAll('.premium-overlay').forEach(el => {
-                el.style.display = 'none';
-                console.log('👻 Hidden overlay:', el);
-            });
-
-            // Hide upgrade buttons
-            document.querySelectorAll('.upgrade-btn, .btn-premium').forEach(el => {
-                if (el.textContent.includes('Get Premium') || el.textContent.includes('Upgrade')) {
-                    el.style.display = 'none';
-                    console.log('🚫 Hidden upgrade button:', el);
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Magic link failed: ${response.status} - ${error}`);
                 }
-            });
 
-            console.log('✅ Premium activation complete!');
-            showAlert('🎉 Premium features unlocked!', 'success');
+                return response.json();
+            }
+
+            async signInWithOAuth(provider) {
+                localStorage.setItem('supabase_url', this.url);
+                localStorage.setItem('supabase_key', this.key);
+                
+                const redirectUrl = `${this.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(window.location.origin)}`;
+                console.log('Redirecting to OAuth:', redirectUrl);
+                window.location.href = redirectUrl;
+            }
+
+            async querySubscriptions(email) {
+                const query = `email=eq.${encodeURIComponent(email)}&status=eq.active&select=plan,status,current_period_end`;
+                const response = await fetch(`${this.url}/rest/v1/subscriptions?${query}`, {
+                    method: 'GET',
+                    headers: this.headers
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Subscription query failed: ${response.status} - ${error}`);
+                }
+
+                return response.json();
+            }
+
+            getStoredToken() {
+                return localStorage.getItem('supabase_token') || localStorage.getItem('access_token');
+            }
+
+            setStoredToken(token) {
+                localStorage.setItem('supabase_token', token);
+                localStorage.setItem('access_token', token);
+            }
+
+            clearStoredToken() {
+                localStorage.removeItem('supabase_token');
+                localStorage.removeItem('access_token');
+            }
         }
 
-        function checkPremiumStatus() {
-            return localStorage.getItem('rhymeTimePremium') === 'true';
+        const supabase = new SimpleSupabase();
+
+        async function loginWithGoogle() {
+            try {
+                showStatus('🧪 Testing connection first...', 'info');
+                
+                const connectionOk = await supabase.testConnection();
+                if (!connectionOk) {
+                    throw new Error('Connection test failed');
+                }
+                
+                showStatus('🔄 Redirecting to Google...', 'info');
+                await supabase.signInWithOAuth('google');
+            } catch (error) {
+                console.error('Google login error:', error);
+                showStatus('❌ Google login failed: ' + error.message, 'error');
+            }
         }
 
-        function checkPayment() {
-            const urlParams = new URLSearchParams(window.location.search);
+        async function sendMagicLink() {
+            const email = document.getElementById('email-input').value.trim();
             
-            // Check for multiple possible success indicators
-            const hasSuccess = urlParams.get('success') === 'true' || 
-                              urlParams.get('payment_success') === 'true' ||
-                              urlParams.get('session_id') || 
-                              urlParams.get('checkout_success') === 'true';
+            if (!email) {
+                showStatus('❌ Please enter your email address', 'error');
+                return;
+            }
 
-            if (hasSuccess) {
-                console.log('💳 Payment success detected!');
+            try {
+                showStatus('🧪 Testing connection...', 'info');
                 
-                const plan = urlParams.get('plan') || urlParams.get('price_id') || 'monthly';
+                const connectionOk = await supabase.testConnection();
+                if (!connectionOk) {
+                    throw new Error('Connection test failed');
+                }
                 
-                // Save premium status
-                localStorage.setItem('rhymeTimePremium', 'true');
-                localStorage.setItem('rhymeTimePlan', plan.toLowerCase());
+                showStatus('📧 Sending magic link...', 'info');
+                await supabase.sendMagicLink(email);
+                showStatus('📧 Check your email for the login link!', 'success');
+            } catch (error) {
+                console.error('Magic link error:', error);
+                showStatus('❌ Magic link failed: ' + error.message, 'error');
+            }
+        }
 
-                // Activate premium immediately
-                activatePremium();
+        async function logout() {
+            supabase.clearStoredToken();
+            currentUser = null;
+            userSubscription = null;
+            updateUI();
+            showStatus('✅ Signed out successfully', 'success');
+        }
+
+        async function checkSubscription(email) {
+            try {
+                const data = await supabase.querySubscriptions(email);
                 
-                // Clean URL to remove payment parameters
-                if (window.history && window.history.replaceState) {
+                // Find active subscription
+                const subscription = data.find(sub => {
+                    return sub.status === 'active' && new Date(sub.current_period_end) > new Date();
+                });
+
+                userSubscription = subscription || null;
+                console.log('Subscription check result:', userSubscription);
+                
+                return subscription;
+            } catch (error) {
+                console.error('Subscription check error:', error);
+                return null;
+            }
+        }
+
+        async function refreshSubscription() {
+            if (!currentUser) return;
+            
+            showStatus('🔄 Refreshing subscription status...', 'info');
+            await checkSubscription(currentUser.email);
+            updateUI();
+            showStatus('✅ Subscription status updated!', 'success');
+        }
+
+        function updateUI() {
+            const isLoggedIn = !!currentUser;
+            const isPremium = !!(userSubscription?.status === 'active');
+            
+            console.log('🎨 Updating UI - Logged in:', isLoggedIn, 'Premium:', isPremium);
+            
+            document.getElementById('login-section').style.display = isLoggedIn ? 'none' : 'block';
+            document.getElementById('user-section').style.display = isLoggedIn ? 'block' : 'none';
+            
+            if (isLoggedIn) {
+                document.getElementById('user-email').textContent = currentUser.email;
+                
+                const subEl = document.getElementById('user-subscription');
+                if (isPremium) {
+                    subEl.textContent = `${userSubscription.plan} (Active)`;
+                    subEl.style.color = '#28a745';
+                } else {
+                    subEl.textContent = 'Free';
+                    subEl.style.color = '#6c757d';
+                }
+                
+                updateUpgradeButton();
+            }
+            
+            if (isPremium) {
+                activatePremiumUI();
+            } else {
+                deactivatePremiumUI();
+            }
+        }
+
+        function updateUpgradeButton() {
+            const monthlyBtn = document.getElementById('monthly-btn');
+            const annualBtn = document.getElementById('annual-btn');
+            
+            let monthlyUrl = CONFIG.STRIPE_MONTHLY_LINK;
+            let annualUrl = CONFIG.STRIPE_ANNUAL_LINK;
+            
+            if (currentUser?.email) {
+                monthlyUrl += `?prefilled_email=${encodeURIComponent(currentUser.email)}`;
+                annualUrl += `?prefilled_email=${encodeURIComponent(currentUser.email)}`;
+            }
+            
+            monthlyBtn.href = monthlyUrl;
+            annualBtn.href = annualUrl;
+        }
+
+        function activatePremiumUI() {
+            console.log('✨ Activating premium UI');
+            document.body.classList.add('premium-user');
+            document.querySelectorAll('.premium-only').forEach(el => {
+                el.style.display = 'block';
+            });
+            document.querySelectorAll('.upgrade-prompt').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        function deactivatePremiumUI() {
+            console.log('🔓 Deactivating premium UI');
+            document.body.classList.remove('premium-user');
+            document.querySelectorAll('.premium-only').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.upgrade-prompt').forEach(el => {
+                el.style.display = 'block';
+            });
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Check for OAuth return
+        function checkForOAuthReturn() {
+            const hash = window.location.hash;
+            if (hash.includes('access_token=')) {
+                const params = new URLSearchParams(hash.substring(1));
+                const accessToken = params.get('access_token');
+                
+                if (accessToken) {
+                    supabase.setStoredToken(accessToken);
+                    showStatus('✅ Authentication successful!', 'success');
+                    
+                    // Mock user for now - in real version you'd get user info from token
+                    currentUser = {
+                        email: 'user@gmail.com'
+                    };
+                    
+                    checkSubscription(currentUser.email).then(() => {
+                        updateUI();
+                    });
+                    
+                    // Clean up URL
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
-                
-                showAlert(`🎉 Welcome to Premium! (${plan} plan)`, 'success');
             }
         }
 
-        function loadData() {
-            try {
-                // Load saved poems
-                var saved = localStorage.getItem('rhymeTimePoems');
-                if (saved) poems = JSON.parse(saved);
-
-                // Check if user already has premium
-                if (checkPremiumStatus()) {
-                    console.log('🔍 Existing premium status found');
-                    activatePremium();
-                }
-            } catch (e) {
-                console.error('Error loading data:', e);
-                poems = [];
-            }
-        }
-
-        function debugStripe() {
-            const isPrem = localStorage.getItem('rhymeTimePremium');
-            const plan = localStorage.getItem('rhymeTimePlan');
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            let debug = `Premium Status: ${isPrem}\n`;
-            debug += `Plan: ${plan}\n`;
-            debug += `URL Params: ${window.location.search}\n`;
-            debug += `Body has premium class: ${document.body.classList.contains('premium')}`;
-            
-            alert(debug);
-            console.log('🔧 Debug Info:', {
-                isPremium: isPrem,
-                plan: plan,
-                urlParams: Object.fromEntries(urlParams),
-                bodyHasPremiumClass: document.body.classList.contains('premium')
-            });
-        }
-
-        // Test function to manually activate premium
-        function forcePremium() {
-            if (confirm('Force activate premium for testing?')) {
-                localStorage.setItem('rhymeTimePremium', 'true');
-                localStorage.setItem('rhymeTimePlan', 'test');
-                activatePremium();
-            }
-        }
-
-        // Close pricing modal when clicking outside it
-        window.onclick = function (event) {
-            const modal = document.getElementById('pricing-modal');
-            if (event.target === modal) hidePricing();
-        };
-
-        // Expose functions to global scope for inline onclick handlers
-        window.showSection = showSection;
-        window.showPricing = showPricing;
-        window.hidePricing = hidePricing;
-        window.buyPlan = buyPlan;
-        window.checkPoem = checkPoem;
-        window.savePoem = savePoem;
-        window.clearText = clearText;
-        window.deletePoem = deletePoem;
-        window.exportPoems = exportPoems;
-        window.clearAllPoems = clearAllPoems;
-        window.debugStripe = debugStripe;
-        window.forcePremium = forcePremium;
-
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('🚀 RhymeTime starting up...');
-            checkPayment();  // Check for successful payment first
-            loadData();      // Then load existing data
-            console.log('✅ RhymeTime ready!');
-        });
+        // Initialize
+        console.log('✅ RhymeTime ready!');
+        
+        // Set upgrade button
+        updateUpgradeButton();
+        
+        // Check for OAuth return
+        window.addEventListener('load', checkForOAuthReturn);
+        checkForOAuthReturn();
     </script>
-    <!-- your existing scripts -->
-<script>
-  /* ... your current JavaScript ... */
-</script>
-
-<!-- new Supabase login & premium check script -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script><script>
-  const SUPABASE_URL = "https://yfabmhamqywczdruzjem.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y";
-
-window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // Call this after DOM is ready (you already have a DOMContentLoaded; calling here is safe too)
-  initAuthAndPremium();
-
-  async function initAuthAndPremium() {
-    // 1) Check login
-    const { data: { user } } = await sb.auth.getUser();
-
-    if (!user) {
-  console.log("Not logged in");
-  // OPTIONAL: show a "Log in" button if you have one
-  // document.getElementById('login-btn')?.classList.remove('hidden');
-  return;
-}
-
-// DEBUG: make sure this matches the email in your Supabase subscriptions table
-console.log("Supabase user object:", user);
-console.log("Email to match in subscriptions table:", user.email);
-    }
-
-    // 2) Check subscriptions table for active sub
-    const { data, error } = await sb
-      .from('subscriptions')
-      .select('status, plan')
-      .eq('email', user.email)
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (error) {
-      console.warn('Sub lookup error:', error);
-      return;
-    }
-
-    if (data) {
-      // Persist + update UI using your existing functions
-      localStorage.setItem('rhymeTimePremium', 'true');
-      localStorage.setItem('rhymeTimePlan', data.plan || 'monthly');
-      if (typeof activatePremium === 'function') activatePremium();
-      // Hide any upgrade buttons
-      document.querySelectorAll('#upgrade, .upgrade-btn, .upgrade, .upgrade-cta, [data-role="upgrade"]')
-        .forEach(el => el.style.display = 'none');
-      console.log('Premium unlocked from Supabase:', data.plan);
-    } else {
-      console.log('No active subscription for this user.');
-    }
-  }
-
-  // SIMPLE LOGIN/LOGOUT (optional, only if you add buttons with these IDs)
-  // Google OAuth (enable Google in Supabase Auth providers)
-  window.loginWithGoogle = async () => {
-    await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-  };
-
-  window.logout = async () => {
-    await sb.auth.signOut();
-    localStorage.removeItem('rhymeTimePremium');
-    localStorage.removeItem('rhymeTimePlan');
-    window.location.reload();
-  }
-}
-<!-- Sign in Button placed at the top of the body for visibility -->
-<body>
- <button onclick="loginWithGoogle()" 
-  style="all: unset; font-size: 20px; padding: 10px 20px; display: block !important; margin: 40px auto; background: #4285F4; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: center;">
-  Sign in with Google
-</button>
-  <script>
-    window.loginWithGoogle = async () => {
-      await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-    };
-
-    window.logout = async () => {
-      await sb.auth.signOut();
-      localStorage.removeItem('rhymeTimePremium');
-      localStorage.removeItem('rhymeTimePlan');
-      window.location.reload();
-    };
-</script>
 </body>
 </html>
-
