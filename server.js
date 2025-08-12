@@ -1,24 +1,41 @@
+// server.js
+require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.static('.'));
-app.use('/stripe-webhook', express.raw({type: 'application/json'}));
+// Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
-app.post('/stripe-webhook', (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  
-  try {
-    const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    
-    if (event.type === 'checkout.session.completed') {
-      console.log('Payment succeeded!');
-    }
-    
-    res.json({received: true});
-  } catch (err) {
-    res.status(400).send('Error');
-  }
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
-app.listen(process.env.PORT || 3000);
+// Stripe webhook example (optional for subscription updates)
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error(`Webhook signature verification failed.`, err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log(`✅ Checkout complete: ${session.customer_email}`);
+    // Here you’d update Supabase subscription table
+  }
+
+  res.json({ received: true });
+});
+
+// Serve index.html for all other routes
+app.get('*
