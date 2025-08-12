@@ -835,11 +835,27 @@ console.log("Email to match in subscriptions table:", user.email);
     window.location.reload();
   }
 }
+<!-- Sign in Button placed at the top of the body for visibility -->
+<body>
+ <button onclick="loginWithGoogle()" 
+  style="all: unset; font-size: 20px; padding: 10px 20px; display: block !important; margin: 40px auto; background: #4285F4; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: center;">
+  Sign in with Google
+</button>
+  <script>
+    window.loginWithGoogle = async () => {
+      await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+    };
 
+    window.logout = async () => {
+      await sb.auth.signOut();
+      localStorage.removeItem('rhymeTimePremium');
+      localStorage.removeItem('rhymeTimePlan');
+      window.location.reload();
+    };
 </script>
-    <button onclick="loginWithGoogle()">Sign in with Google</button>
-
-</script>
-
 </body>
 </html>
+
