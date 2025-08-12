@@ -388,6 +388,9 @@
             <input type="email" id="email-input" class="email-input" placeholder="Enter your email address">
             <br>
             <button class="login-btn" onclick="handleLogin()">📧 Send Login Link</button>
+          
+            <button id="google-btn" class="login-btn" style="margin-top: 10px;">
+  Sign in with Google
         </div>
         
         <div id="login-status"></div>
@@ -509,9 +512,6 @@
             </a>
         </div>
         
-        <p style="font-size: 14px; opacity: 0.9; margin-top: 20px;">
-            ✨ 7-day free trial • Cancel anytime • Secure payments
-        </p>
     </div>
 
     <script>
@@ -940,9 +940,60 @@ But morning light brings hope again, and shows how much we care`;
                 window.location.reload();
             }
         }
+       <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
-        // Initialize app
-        checkLoginReturn();
-    </script>
+  const supabase = createClient(
+    'https://yfabmhamqywczdruzjem.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
+  );
+
+  const googleBtn = document.getElementById('google-btn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) {
+        alert('Google login failed: ' + error.message);
+      }
+    });
+  }
+</script>
+
+<!-- Keep your existing code -->
+
+<!-- Google login setup -->
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+
+  const supabase = createClient(
+    'https://yfabnmaqwxcdrus2em.supabase.co',
+    'YOUR_PUBLIC_ANON_KEY'
+  );
+
+  const redirectUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080'
+    : window.location.origin;
+
+  const googleBtn = document.getElementById('google-btn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl }
+      });
+      if (error) {
+        alert('Google login failed: ' + error.message);
+      }
+    });
+  }
+
+<!-- Initialize app -->
+
+ // Initialize app
+checkLoginReturn();
+</script>
 </body>
 </html>
