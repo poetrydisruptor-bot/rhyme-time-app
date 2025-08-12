@@ -326,6 +326,11 @@
             .email-input {
                 width: 90%;
             }
+            /* Pricing cards stack on mobile */
+            .pricing-section div[style*="display: flex"] {
+                flex-direction: column !important;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -388,16 +393,12 @@
             <input type="email" id="email-input" class="email-input" placeholder="Enter your email address">
             <br>
             <button class="login-btn" onclick="handleLogin()">📧 Send Login Link</button>
-          
             <button id="google-btn" class="login-btn" style="margin-top: 10px;">
-  Sign in with Google
+                Sign in with Google
+            </button>
         </div>
         
         <div id="login-status"></div>
-        
-        <p style="font-size: 14px; opacity: 0.8; margin-top: 20px;">
-            We'll send you a secure login link - no passwords needed!
-        </p>
     </div>
 
     <!-- Premium Features - LOCKED -->
@@ -486,7 +487,7 @@
 
     <!-- Pricing Section -->
     <div class="pricing-section">
-        <h3>💎 Premium Plan</h3>
+        <h3>💎 Premium Plans</h3>
         <p>Unlock all advanced features and support RhymeTime development!</p>
         
         <div style="margin: 20px 0;">
@@ -506,14 +507,41 @@
             </div>
         </div>
         
+        <!-- Pricing Options -->
         <div style="margin-top: 30px;">
-            <a href="#" class="pricing-btn" onclick="showPricing()">
-                💎 Get Premium - $12.99/month
-            </a>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <!-- Monthly Plan -->
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; min-width: 200px; text-align: center;">
+                    <h4 style="margin: 0 0 10px 0;">Monthly Plan</h4>
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">$12.99</div>
+                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">per month</div>
+                    <button class="pricing-btn" onclick="showPricing('monthly')" style="width: 100%; margin: 0;">
+                        💳 Get Monthly
+                    </button>
+                </div>
+                
+                <!-- Annual Plan - Best Value -->
+                <div style="background: rgba(255,215,0,0.2); padding: 20px; border-radius: 10px; min-width: 200px; text-align: center; border: 3px solid #ffd700; position: relative;">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #333; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                        BEST VALUE
+                    </div>
+                    <h4 style="margin: 0 0 10px 0;">Annual Plan</h4>
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;">$99</div>
+                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 5px;">per year</div>
+                    <div style="font-size: 12px; color: #ffd700; font-weight: bold; margin-bottom: 15px;">Save $56.88!</div>
+                    <button class="pricing-btn" onclick="showPricing('annual')" style="width: 100%; margin: 0; background: #ffd700; color: #333;">
+                        🎯 Get Annual
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
+                ✨ Both plans include 7-day free trial • Cancel anytime
+            </div>
         </div>
-        
     </div>
 
+    <!-- Main JavaScript -->
     <script>
         // Track if user is logged in
         let isLoggedIn = false;
@@ -717,11 +745,18 @@ I play the nurse's vital part`;
             }
         }
 
-        function showPricing() {
-            showStatus('💎 Premium pricing: $12.99/month with 7-day free trial', 'info');
-            setTimeout(() => {
-                alert("Premium Sign-up:\n\n$12.99/month\n• 7-day free trial\n• Cancel anytime\n• All premium features\n\nContact support@rhymetime.app to get started!");
-            }, 500);
+        function showPricing(plan = 'monthly') {
+            if (plan === 'annual') {
+                showStatus('💎 Annual Premium: $99/year - Save $56.88!', 'info');
+                setTimeout(() => {
+                    alert("Annual Premium Sign-up:\n\n$99/year (Save $56.88!)\n• 7-day free trial\n• Cancel anytime\n• All premium features\n• Best value option\n\nContact support@rhymetime.app to get started!");
+                }, 500);
+            } else {
+                showStatus('💎 Monthly Premium: $12.99/month with 7-day free trial', 'info');
+                setTimeout(() => {
+                    alert("Monthly Premium Sign-up:\n\n$12.99/month\n• 7-day free trial\n• Cancel anytime\n• All premium features\n\nContact support@rhymetime.app to get started!");
+                }, 500);
+            }
         }
 
         // Premium functions (only work when logged in)
@@ -813,8 +848,8 @@ But morning light brings hope again, and shows how much we care`;
                 statusDiv.innerHTML = '<div class="status info">📧 Sending login link...</div>';
                 
                 try {
-                    // Try direct Supabase call
-                    const response = await fetch('https://yfabmhamqywczdruzjem.supabase.co/auth/v1/magiclink', {
+                    // Try Supabase magic link with Google email setup
+                    const response = await fetch('https://yfabmhamqywczdruzjem.supabase.co/auth/v1/signup', {
                         method: 'POST',
                         mode: 'cors',
                         headers: {
@@ -824,6 +859,8 @@ But morning light brings hope again, and shows how much we care`;
                         },
                         body: JSON.stringify({
                             email: email,
+                            password: '',
+                            data: {},
                             options: {
                                 emailRedirectTo: window.location.origin + '?login=success'
                             }
@@ -831,23 +868,46 @@ But morning light brings hope again, and shows how much we care`;
                     });
 
                     if (response.ok) {
-                        statusDiv.innerHTML = '<div class="status success">✅ Login link sent! Check your email (including spam folder) and click the link to access premium features.</div>';
+                        statusDiv.innerHTML = '<div class="status success">✅ Magic link sent! Check your email (including spam folder) and click the link to access premium features.</div>';
                         localStorage.setItem('pending_login_email', email);
                         return;
                     } else {
-                        throw new Error(`HTTP ${response.status}`);
+                        // Try alternative endpoint for existing users
+                        const loginResponse = await fetch('https://yfabmhamqywczdruzjem.supabase.co/auth/v1/recovery', {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: {
+                                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y',
+                                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                options: {
+                                    redirectTo: window.location.origin + '?login=success'
+                                }
+                            })
+                        });
+
+                        if (loginResponse.ok) {
+                            statusDiv.innerHTML = '<div class="status success">✅ Login link sent! Check your email (including spam folder) and click the link to access premium features.</div>';
+                            localStorage.setItem('pending_login_email', email);
+                            return;
+                        } else {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
                     }
                 } catch (fetchError) {
-                    console.log('Login system temporarily unavailable:', fetchError.message);
+                    console.log('Email system error:', fetchError.message);
                     
-                    // Fallback contact method
+                    // Fallback to support contact
                     statusDiv.innerHTML = `
                         <div class="status warning">
-                            <strong>📧 Login System Temporarily Unavailable</strong><br><br>
-                            Please contact support to activate your premium account:<br><br>
+                            <strong>📧 Email Delivery Issue</strong><br><br>
+                            There was a problem sending your login link. Please contact support:<br><br>
                             <strong>Email:</strong> <a href="mailto:support@rhymetime.app?subject=Premium%20Access%20Request&body=Please%20activate%20premium%20for:%20${encodeURIComponent(email)}" style="color: white; text-decoration: underline;">support@rhymetime.app</a><br>
                             <strong>Subject:</strong> Premium Access Request<br><br>
-                            We'll activate your account within 24 hours!
+                            We'll activate your account quickly!
                         </div>
                     `;
                 }
@@ -858,7 +918,7 @@ But morning light brings hope again, and shows how much we care`;
                 const email = document.getElementById('email-input').value.trim();
                 statusDiv.innerHTML = `
                     <div class="status error">
-                        <strong>❌ Unable to Send Login Link</strong><br><br>
+                        <strong>❌ Login System Error</strong><br><br>
                         Please contact support for manual activation:<br>
                         <strong>Email:</strong> <a href="mailto:support@rhymetime.app" style="color: white;">support@rhymetime.app</a><br>
                         <strong>Include:</strong> Your email (${email}) and "Premium Access Request"<br><br>
@@ -940,58 +1000,32 @@ But morning light brings hope again, and shows how much we care`;
                 window.location.reload();
             }
         }
-       <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
-  const supabase = createClient(
-    'https://yfabmhamqywczdruzjem.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
-  );
+        // Initialize app
+        checkLoginReturn();
+    </script>
 
-  const googleBtn = document.getElementById('google-btn');
-  if (googleBtn) {
-    googleBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
-      });
-      if (error) {
-        alert('Google login failed: ' + error.message);
-      }
-    });
-  }
-</script>
+    <!-- Google OAuth Integration -->
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
-<!-- Keep your existing code -->
+        const supabase = createClient(
+            'https://yfabmhamqywczdruzjem.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
+        );
 
-<!-- Google login setup -->
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-
-  const supabase = createClient(
-    'https://yfabnmaqwxcdrus2em.supabase.co',
-    'YOUR_PUBLIC_ANON_KEY'
-  );
-
-  const redirectUrl = window.location.hostname === 'localhost'
-    ? 'http://localhost:8080'
-    : window.location.origin;
-
-  const googleBtn = document.getElementById('google-btn');
-  if (googleBtn) {
-    googleBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectUrl }
-      });
-      if (error) {
-        alert('Google login failed: ' + error.message);
-      }
-    });
-  }
-
- // Initialize app
-checkLoginReturn();
-</script>
+        const googleBtn = document.getElementById('google-btn');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', async () => {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin }
+                });
+                if (error) {
+                    alert('Google login failed: ' + error.message);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
