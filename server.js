@@ -260,9 +260,9 @@ app.get('*', (_req, res) => {
 });
 
 // --- Start server ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 RhymeTime server listening on port ${PORT}`);
-  console.log(`📡 Webhook endpoint: /stripe-webhook`);
-  console.log(`🏥 Health check: /health`);
+const PORT = process.env.PORT || 3000;   // fallback is fine
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`RhymeTime server listening on port ${PORT}`);
+  console.log(`Webhook endpoint: /stripe-webhook`);
+  console.log(`Health check: /health`);
 });
