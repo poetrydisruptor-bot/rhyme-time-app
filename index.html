@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+// Temporary hotfix: disable any window.alert calls in prod
+if (location.hostname.includes('railway.app')) {
+  window.alert = function(){};
+}
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RhymeTime</title>
@@ -505,42 +512,12 @@
                 <div>🔒 50+ nursing poem library</div>
                 <div>🔒 Priority email support</div>
             </div>
-        </div>
-        
-        <!-- Pricing Options -->
-        <div style="margin-top: 30px;">
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                <!-- Monthly Plan -->
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; min-width: 200px; text-align: center;">
-                    <h4 style="margin: 0 0 10px 0;">Monthly Plan</h4>
-                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">$12.99</div>
-                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">per month</div>
-                    <button class="pricing-btn" onclick="showPricing('monthly')" style="width: 100%; margin: 0;">
-                        💳 Get Monthly
-                    </button>
-                </div>
-                
-                <!-- Annual Plan - Best Value -->
-                <div style="background: rgba(255,215,0,0.2); padding: 20px; border-radius: 10px; min-width: 200px; text-align: center; border: 3px solid #ffd700; position: relative;">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #333; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-                        BEST VALUE
-                    </div>
-                    <h4 style="margin: 0 0 10px 0;">Annual Plan</h4>
-                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;">$99</div>
-                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 5px;">per year</div>
-                    <div style="font-size: 12px; color: #ffd700; font-weight: bold; margin-bottom: 15px;">Save $56.88!</div>
-                    <button class="pricing-btn" onclick="showPricing('annual')" style="width: 100%; margin: 0; background: #ffd700; color: #333;">
-                        🎯 Get Annual
-                    </button>
-                </div>
-            </div>
-            
-            <div style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
-                ✨ Both plans include 7-day free trial • Cancel anytime
-            </div>
-        </div>
+            <div style="background: rgba(255,215,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+  <a href="https://billing.stripe.com/p/login/8x27sKejL1Z16Ji1sW1VK00"
+     style="display: inline-block; font-size: 18px; font-weight: bold; padding: 10px 20px; background-color: #ffd700; color: #000; border-radius: 6px; text-decoration: none;">
+    Manage Billing
+  </a>
     </div>
-
     <!-- Single merged module script -->
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js';
