@@ -522,11 +522,20 @@ if (location.hostname.includes('railway.app')) {
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 
+
         // ===== Supabase client (uses your values) =====
         const supabase = createClient(
             'https://yfabmhamqywczdruzjem.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
         );
+        (function () {
+  const params = new URLSearchParams(location.search);
+  const turnedOn = params.get('owner') === '1';
+  if (turnedOn) {
+    localStorage.setItem('rt_owner_unlock', '1');
+    history.replaceState({}, '', location.pathname);
+  }
+})();
 
         // ===== Your existing app logic (kept intact) =====
         let isLoggedIn = false;
