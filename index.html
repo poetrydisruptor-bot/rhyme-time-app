@@ -524,8 +524,9 @@ if (location.hostname.includes('railway.app')) {
 
         // ===== Supabase client (uses your values) =====
         const supabase = createClient(
-            'https://yfabmhamqywczdruzjem.supabase.co'
-        );'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDk0MDA2NSwiZXhwIjoyMDcwNTE2MDY1fQ.U824ZMBn-patUQJ1fx9rjLSqPTDxnmx8BypSxWgcOZI'
+            'https://yfabmhamqywczdruzjem.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
+          );
         (function () {
   const params = new URLSearchParams(location.search);
   const turnedOn = params.get('owner') === '1';
