@@ -527,6 +527,40 @@ if (location.hostname.includes('railway.app')) {
             'https://yfabmhamqywczdruzjem.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYWJtaGFtcXl3Y3pkcnV6amVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NDAwNjUsImV4cCI6MjA3MDUxNjA2NX0.ePHEWI_3PCzNRdeDwAIqM2VJnIPAV28Q7ppX5hWTr5Y'
           );
+
+          (async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
+    // Fetch profile from Supabase
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!error && data) {
+      if (data.subscription_status === 'active') {
+        document.getElementById('manage-billing').style.display = 'inline-block';
+        document.getElementById('unlock-buttons').style.display = 'none';
+      } else {
+        document.getElementById('manage-billing').style.display = 'none';
+        document.getElementById('unlock-buttons').style.display = 'block';
+      }
+    }
+  }
+})();
+     <div id="unlock-buttons">
+     <a href="https://buy.stripe.com/fZufZg8Zr0UX2t24F81VK01">Unlock Monthly</a>
+      <a href="https://buy.stripe.com/8x27sKejL1Z16Ji1sW1VK00">Unlock Annual</a>
+     </div>
+
+     <a id="manage-billing"
+
+   href="billing.stripe.com/p/login/8x27sKejL1Z16Ji1sW1VK00"
+   style="display:none">
+   Manage Billing
+</a>
         (function () {
   const params = new URLSearchParams(location.search);
   const turnedOn = params.get('owner') === '1';
