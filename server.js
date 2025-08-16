@@ -30,25 +30,32 @@ app.post(
       console.log(`📩 Received webhook: ${event.type}`);
 
       switch (event.type) {
-        case 'checkout.session.completed':
-          await handleCheckoutCompleted(event.data.object);
-          break;
+       case 'checkout.session.completed': {
+  // fires after a successful checkout
+  await handleCheckoutCompleted(event.data.object);
+  break;
+}
 
-        case 'customer.subscription.updated':
-          await handleSubscriptionChanged(event.data.object);
-          break;
+case 'customer.subscription.updated': {
+  await handleSubscriptionChanged(event.data.object);
+  break;
+}
 
-        case 'customer.subscription.deleted':
-          await handleSubscriptionDeleted(event.data.object);
-          break;
+case 'customer.subscription.deleted': {
+  await handleSubscriptionDeleted(event.data.object);
+  break;
+}
 
-        case 'invoice.payment_succeeded':
-          await handlePaymentSucceeded(event.data.object);
-          break;
+case 'invoice.payment_succeeded': {
+  await handlePaymentSucceeded(event.data.object);
+  break;
+}
 
-        case 'invoice.payment_failed':
-          await handlePaymentFailed(event.data.object);
-          break;
+case 'invoice.payment_failed': {
+  await handlePaymentFailed(event.data.object);
+  break;
+}
+
 
         default:
           console.log(`📋 Unhandled event type: ${event.type}`);
@@ -165,31 +172,41 @@ async function handleSubscriptionDeleted(subscription) {
   }
 }
 
-// Handle successful payment (renewals)
+// --- Handle successful payment (renewals) ---
 async function handlePaymentSucceeded(invoice) {
-  console.log(`💳 Processing successful payment: ${invoice.id}`);
+  console.log('✅ Processing successful payment:', invoice.id);
 
+  // If this is tied to a subscription, refresh subscription info
   if (invoice.subscription) {
-    const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+    const subscription = await stripe.subscriptions.retrieve(invoice.subscription, {
+      expand: ['items.data.price', 'latest_invoice.customer_email']
+    });
+
     await handleSubscriptionChanged(subscription);
+  } else {
+    // Fallback: mark the customer as active via email on the invoice
+    const customer = await stripe.customers.retrieve(invoice.customer);
+    const email = customer.email;
+    if (email) {
+      await updateSubscription(email, { status: 'active' });
+    }
   }
 }
-
-// Handle failed payment
+// --- Handle failed payment ---
 async function handlePaymentFailed(invoice) {
-  console.log(`💥 Processing failed payment: ${invoice.id}`);
+  console.log('⚠️ Processing failed payment:', invoice.id);
 
   try {
+    // Try to find the customer and their email from the invoice
     const customer = await stripe.customers.retrieve(invoice.customer);
     const email = customer.email;
 
     if (email) {
-      await updateSubscription(email, {
-        status: 'past_due'
-      });
+      await updateSubscription(email, { status: 'past_due' });
     }
   } catch (error) {
     console.error('❌ Error handling payment failure:', error);
+    throw error;
   }
 }
 
